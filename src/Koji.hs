@@ -10,21 +10,25 @@ module Koji
          getTagID,
          listPackagesSimple,
          checkTagPackage,
-         getLatestBuild
+         getLatestBuild,
+         getTaskInfo,
+         TaskState(..),
+         getBuild
        ) where
 
+import Data.Aeson
+import qualified Data.ByteString.Lazy.Char8 as B
 import Data.Text (Text)
 import Optics.Core
 import Data.Aeson.Optics
-import SimpleCmd
+import System.Process.Typed
 
---hub :: String
---hub = "https://koji.fedoraproject.org/kojihub"
---hub = "https://brewhub.engineering.redhat.com/brewhub"
-
-kojiCall :: String -> [String] -> IO String
+kojiCall :: String -> [String] -> IO Value
 kojiCall c args = do
-  cmd "koji" ("call":"--json-output":c:args)
+  (out,err) <- readProcess_ (proc "koji" ("call":"--json-output":c:args))
+  case decode out of
+    Nothing -> error (B.unpack err) -- $ "Failure for: koji call " ++ unwords (c:args)
+    Just v -> return v
 
 listTags :: IO [Text]
 listTags = do
@@ -70,3 +74,22 @@ getLatestBuild :: String -> String -> IO (Maybe Text)
 getLatestBuild tag pkg = do
   res <- kojiCall "getLatestBuilds" [tag, "None", pkg]
   return $ res ^? key "nvr" % _String
+
+data TaskState = FREE | OPEN | CLOSED | CANCELED | ASSIGNED | FAILED
+  deriving (Eq, Enum)
+
+--data TaskInfo = TaskInfo String TaskState
+
+getTaskInfo :: Int -> IO Value --(Maybe TaskState)
+getTaskInfo taskid = do
+  {-res <--} kojiCall "getTaskInfo" [show taskid]
+  -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
+  --     arch = res ^? key "arch" % _String
+  -- return $ TaskInfo arch state
+
+getBuild :: Int -> IO Value
+getBuild buildid = do
+  {-res <--} kojiCall "getBuild" [show buildid]
+--  return $ res ^? key "state" % _Integer <&> (toEnum . fromInteger)
+
+
