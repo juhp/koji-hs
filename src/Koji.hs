@@ -4,6 +4,8 @@ module Koji
        ( kojiCall,
          hello,
          listTags,
+         listTagsBuild,
+         listTagsPackage,
          getPackageID,
          getTagID,
          listPackagesSimple,
@@ -12,8 +14,8 @@ module Koji
        ) where
 
 import Data.Text (Text)
-import Lens.Micro
-import Lens.Micro.Aeson
+import Optics.Core
+import Data.Aeson.Optics
 import SimpleCmd
 
 --hub :: String
@@ -27,12 +29,22 @@ kojiCall c args = do
 listTags :: IO [Text]
 listTags = do
   res <- kojiCall "listTags" []
-  return $ res ^.. values . key "name" . _String
+  return $ res ^.. values % key "name" % _String
 
-hello :: IO Text
+listTagsBuild :: String -> IO [Text]
+listTagsBuild bld = do
+  res <- kojiCall "listTags" [bld]
+  return $ res ^.. values % key "name" % _String
+
+listTagsPackage :: String -> IO [Text]
+listTagsPackage pkg = do
+  res <- kojiCall "listTags" ["None", pkg]
+  return $ res ^.. values % key "name" % _String
+
+hello :: IO (Maybe Text)
 hello = do
   res <- kojiCall "hello" []
-  return $ res ^. _String
+  return $ res ^? _String
 
 getPackageID :: String -> IO (Maybe Integer)
 getPackageID pkg = do
@@ -47,7 +59,7 @@ getTagID tag = do
 listPackagesSimple :: String -> IO [Text]
 listPackagesSimple prefix = do
   res <- kojiCall "listPackagesSimple" [prefix]
-  return $ res ^.. values . key "package_name" . _String
+  return $ res ^.. values % key "package_name" % _String
 
 checkTagPackage :: Int -> Int -> IO Bool
 checkTagPackage tagid pkgid = do
@@ -57,4 +69,4 @@ checkTagPackage tagid pkgid = do
 getLatestBuild :: String -> String -> IO (Maybe Text)
 getLatestBuild tag pkg = do
   res <- kojiCall "getLatestBuilds" [tag, "None", pkg]
-  return $ res ^? values . key "nvr" . _String
+  return $ res ^? key "nvr" % _String
