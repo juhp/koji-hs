@@ -29,15 +29,12 @@ library
   exposed-modules:     Koji
                        
 
-  build-depends:       base >= 4.9.1.0 && < 4.14
-                     
+  build-depends:       base >= 4.9.1.0 && < 5,
+                       microlens,
+                       microlens-aeson,
+                       simple-cmd,
+                       text
 
   ghc-options:         -Wall
-                       -Wincomplete-uni-patterns
-                       -Wincomplete-record-updates
-                       -Wcompat
-                       -Widentities
-                       -Wredundant-constraints
 
   default-language:    Haskell2010
-  default-extensions:  OverloadedStrings
