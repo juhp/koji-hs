@@ -1,1 +1,5 @@
 resolver: lts-11.22
+
+extra-deps:
+  - git: https://github.com/juhp/haxr.git
+    commit: c31541fff3511e964ea28c530d3f7fac6c071848
