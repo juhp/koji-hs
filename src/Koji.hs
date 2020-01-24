@@ -27,11 +27,11 @@ import Network.XmlRpc.Internals
 
 hub :: String
 hub = "https://koji.fedoraproject.org/kojihub"
----hub = "https://brewhub.engineering.redhat.com/brewhub"
 
-koji :: Remote a => String -> a
-koji c = remote hub c
---koji c = remoteWithHeaders hub c [("User-Agent", "koji/1")]
+koji :: Remote a =>
+        String -- ^ command
+     -> a
+koji = remote hub
 
 -- xmlrpc :: String -> String -> [Value] -> IO Value
 -- xmlrpc url m args = do
@@ -51,56 +51,67 @@ koji c = remote hub c
 hello :: IO String
 hello = koji "hello"
 
-getPackageID :: String -> IO Int
-getPackageID pkg =
-  koji "getPackageID" pkg
+getPackageID :: String -- ^ package
+             -> IO Int -- ^ pkgid
+getPackageID =
+  koji "getPackageID"
 
-getTagID :: String -> IO Int
-getTagID tag =
-  koji "getTagID" tag
+getTagID :: String -- ^ tag
+         -> IO Int -- ^ tagid
+getTagID =
+  koji "getTagID"
 
 type Struct = [(String,Value)]
 
-listPackagesSimple :: String -> IO [Struct]
-listPackagesSimple prefix = do
-  koji "listPackagesSimple" prefix
+listPackagesSimple :: String -- ^ package name search prefix
+                   -> IO [Struct]
+listPackagesSimple =
+  koji "listPackagesSimple"
 
 listTags :: IO Value
 listTags =
   koji "listTags"
 
-listTagsBuild :: Int -> IO Value
+listTagsBuild :: Int -- ^ buildid
+              -> IO Value
 listTagsBuild buildid =
   koji "listTags" buildid ()
 
-listTagsPackage :: Int -> IO Value
-listTagsPackage pkgid =
-  koji "listTags" () pkgid
+listTagsPackage :: Int -- ^ pkgid
+                -> IO Value
+listTagsPackage =
+  koji "listTags" ()
 
-checkTagPackage :: Int -> Int -> IO Bool
-checkTagPackage tagid pkgid =
-  koji "checkTagPackage" tagid pkgid
+checkTagPackage :: Int -- ^ tagid
+                -> Int -- ^ pkgid
+                -> IO Bool
+checkTagPackage =
+  koji "checkTagPackage"
 
-getLatestBuild :: String -> String -> IO Value
-getLatestBuild tag pkg =
-  koji "getLatestBuilds" tag () pkg
+getLatestBuild :: String -- ^ tag
+               -> String -- ^ pkg
+               -> IO Value
+getLatestBuild tag =
+  koji "getLatestBuilds" tag ()
 
 -- data TaskState = FREE | OPEN | CLOSED | CANCELED | ASSIGNED | FAILED
 --   deriving (Eq, Enum)
 
 --data TaskInfo = TaskInfo String TaskState
 
-getTaskInfo :: Int -> IO Struct
-getTaskInfo taskid =
-  koji "getTaskInfo" taskid
+getTaskInfo :: Int -- ^ taskid
+            -> IO Struct
+getTaskInfo =
+  koji "getTaskInfo"
   -- res <- kojiCall "getTaskInfo" [show taskid]
   -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
   --     arch = res ^? key "arch" % _String
   -- return $ TaskInfo arch state
 
-getBuild :: Int -> IO Struct
-getBuild buildid =
-  koji "getBuild" buildid
+getBuild :: Int -- ^ buildid
+         -> IO Struct
+getBuild =
+  koji "getBuild"
 
 data TaskState = FREE | OPEN | CLOSED | CANCELED | ASSIGNED | FAILED
   deriving (Eq, Enum)
@@ -112,9 +123,10 @@ stateToValue :: TaskState -> Value
 stateToValue = ValueInt . fromEnum
 
 readState :: Value -> TaskState
-readState (ValueInt i) | i `elem` (map fromEnum (enumFrom FREE)) = toEnum i
+readState (ValueInt i) | i `elem` map fromEnum (enumFrom FREE) = toEnum i
 readState _ = error "invalid task state"
 
-listTasks :: Struct -> Struct -> IO [Struct]
-listTasks opts qopts = koji "listTasks" opts qopts
-
+listTasks :: Struct -- ^ opts
+          -> Struct -- ^ qopts
+          -> IO [Struct]
+listTasks = koji "listTasks"
