@@ -113,18 +113,18 @@ getBuild :: Int -- ^ buildid
 getBuild =
   koji "getBuild"
 
-data TaskState = FREE | OPEN | CLOSED | CANCELED | ASSIGNED | FAILED
-  deriving (Eq, Enum)
+-- data TaskState = FREE | OPEN | CLOSED | CANCELED | ASSIGNED | FAILED
+--   deriving (Eq, Enum)
 
-openstates :: Value
-openstates = ValueArray $ map (ValueInt . fromEnum) [FREE, OPEN, ASSIGNED]
+-- openstates :: Value
+-- openstates = ValueArray $ map (ValueInt . fromEnum) [FREE, OPEN, ASSIGNED]
 
-stateToValue :: TaskState -> Value
-stateToValue = ValueInt . fromEnum
+-- stateToValue :: TaskState -> Value
+-- stateToValue = ValueInt . fromEnum
 
-readState :: Value -> TaskState
-readState (ValueInt i) | i `elem` map fromEnum (enumFrom FREE) = toEnum i
-readState _ = error "invalid task state"
+-- readState :: Value -> TaskState
+-- readState (ValueInt i) | i `elem` map fromEnum (enumFrom FREE) = toEnum i
+-- readState _ = error "invalid task state"
 
 listTasks :: Struct -- ^ opts
           -> Struct -- ^ qopts
