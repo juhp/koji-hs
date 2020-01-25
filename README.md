@@ -10,4 +10,4 @@ This is a WIP.
 
 ## Installation
 
-Build with `stack` or `cabal new-build`.
+Build with `stack` or `cabal new-build` (cabal-install >= 2.4).
