@@ -17,7 +17,7 @@ tested-with:         GHC == 8.0.2
                    , GHC == 8.2.2
                    , GHC == 8.4.4
                    , GHC == 8.6.5
-                   , GHC == 8.8.1
+                   , GHC == 8.8.2
 
 source-repository head
   type:                git
@@ -28,7 +28,7 @@ library
   exposed-modules:     Koji
 
   build-depends:       base >= 4 && < 5
-                     , haxr
+                     , haxr >= 3000.11.4
 
   ghc-options:         -Wall
 

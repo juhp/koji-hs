@@ -1,6 +1,0 @@
-packages: .
-
-source-repository-package
-    type: git
-    location: https://github.com/juhp/haxr.git
-    tag: c31541fff3511e964ea28c530d3f7fac6c071848

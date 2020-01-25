@@ -2,5 +2,5 @@ resolver: lts-12.26
 
 extra-deps:
   - HaXml-1.25.5
-  - git: https://github.com/juhp/haxr.git
-    commit: c31541fff3511e964ea28c530d3f7fac6c071848
+  - polyparse-1.13
+  - haxr-3000.11.4
