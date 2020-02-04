@@ -13,7 +13,8 @@ module Koji
        , checkTagPackage
        , getLatestBuild
        , getTaskInfo
-       , getBuild
+       , getBuildById
+       , getBuildByNVR
        , listTasks
        )
 where
@@ -108,10 +109,19 @@ getTaskInfo =
   --     arch = res ^? key "arch" % _String
   -- return $ TaskInfo arch state
 
-getBuild :: Int -- ^ buildid
-         -> IO Struct
-getBuild =
-  koji "getBuild"
+getBuildById :: Int -- ^ buildid
+         -> IO (Maybe Struct)
+getBuildById bid =
+  maybeStruct <$> koji "getBuild" bid
+
+maybeStruct :: Value -> Maybe Struct
+maybeStruct (ValueStruct st) = Just st
+maybeStruct _ = Nothing
+
+getBuildByNVR :: String -- ^ NVR
+         -> IO (Maybe Struct)
+getBuildByNVR nvr =
+  maybeStruct <$> koji "getBuild" nvr
 
 -- data TaskState = FREE | OPEN | CLOSED | CANCELED | ASSIGNED | FAILED
 --   deriving (Eq, Enum)
