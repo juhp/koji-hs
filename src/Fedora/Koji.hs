@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Koji
+module Fedora.Koji
        (
          koji
        , hello
