@@ -26,6 +26,7 @@ source-repository head
 library
   hs-source-dirs:      src
   exposed-modules:     Fedora.Koji
+                       Fedora.Koji.Lowlevel
 
   build-depends:       base >= 4 && < 5
                      , haxr >= 3000.11.4
