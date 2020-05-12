@@ -24,6 +24,7 @@ module Fedora.Koji
        , readTaskState
        , BuildState(..)
        , readBuildState
+       , lookupStruct
        )
 where
 
