@@ -5,6 +5,7 @@ module Fedora.Koji
        , kojiBuildTags
        , kojiGetBuildID
        , kojiGetBuildState
+       , kojiGetTaskInfo
        , kojiGetTaskChildren
        , kojiGetUserID
        , kojiListTaskIDs
@@ -105,8 +106,6 @@ readTaskState _ = error "invalid task state"
 getTaskState :: Struct -> Maybe TaskState
 getTaskState st = readTaskState <$> lookup "state" st
 
---data TaskInfo = TaskInfo String TaskState
-
 data BuildInfo = BuildInfoID Int | BuildInfoNVR String
 
 buildInfo :: BuildInfo -> Info
@@ -137,7 +136,7 @@ kojiListTaskIDs opts qopts =
 
 kojiGetUserID :: String -> IO (Maybe UserID)
 kojiGetUserID name = do
-  res <- maybeStruct <$> koji "getUser" name
+  res <- getUser (InfoString name) False
   return $ readID =<< res
 
 kojiBuildTags :: BuildInfo -> IO [String]
@@ -160,6 +159,14 @@ kojiGetBuildState buildinfo = do
     Nothing -> return Nothing
     Just build -> return $ readBuildState <$> lookupStruct "state" build
 
+kojiGetTaskInfo :: TaskID
+                -> IO Struct
+kojiGetTaskInfo tid = getTaskInfo (getID tid) False
+  -- res <- kojiCall "getTaskInfo" [show taskid]
+  -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
+  --     arch = res ^? key "arch" % _String
+  -- return $ TaskInfo arch state
+
 kojiGetTaskChildren :: TaskID -> Bool -> IO [Struct]
 kojiGetTaskChildren tid =
-  koji "getTaskChildren" (getID tid)
+  getTaskChildren (getID tid)
