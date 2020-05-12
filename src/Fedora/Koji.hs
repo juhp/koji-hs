@@ -163,7 +163,7 @@ kojiGetBuildState buildinfo = do
 
 kojiGetTaskInfo :: TaskID
                 -> IO Struct
-kojiGetTaskInfo tid = getTaskInfo (getID tid) False
+kojiGetTaskInfo tid = getTaskInfo (getID tid) True
   -- res <- kojiCall "getTaskInfo" [show taskid]
   -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
   --     arch = res ^? key "arch" % _String
