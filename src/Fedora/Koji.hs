@@ -5,6 +5,7 @@ module Fedora.Koji
        , kojiBuildTags
        , kojiGetBuildID
        , kojiGetBuildState
+       , kojiGetTaskChildren
        , kojiGetUserID
        , kojiListTaskIDs
        , PackageID(..)
@@ -16,6 +17,7 @@ module Fedora.Koji
        , readID
        , readID'
        , TaskState(..)
+       , getTaskState
        , openTaskStates
        , readTaskState
        , BuildState(..)
@@ -100,10 +102,8 @@ readTaskState :: Value -> TaskState
 readTaskState (ValueInt i) | i `elem` map fromEnum (enumFrom TaskFree) = toEnum i
 readTaskState _ = error "invalid task state"
 
--- getTaskState :: Struct -> Maybe TaskState
--- getTaskState st =
---   either error readTaskState <$> runExceptT (getField "state" st)
--- --  readState <$> lookup "state" st
+getTaskState :: Struct -> Maybe TaskState
+getTaskState st = readTaskState <$> lookup "state" st
 
 --data TaskInfo = TaskInfo String TaskState
 
@@ -159,3 +159,7 @@ kojiGetBuildState buildinfo = do
   case mbuild of
     Nothing -> return Nothing
     Just build -> return $ readBuildState <$> lookupStruct "state" build
+
+kojiGetTaskChildren :: TaskID -> Bool -> IO [Struct]
+kojiGetTaskChildren tid =
+  koji "getTaskChildren" (getID tid)
