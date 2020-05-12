@@ -21,6 +21,7 @@ module Fedora.Koji
        , TaskState(..)
        , getTaskState
        , openTaskStates
+       , openTaskValues
        , readTaskState
        , BuildState(..)
        , readBuildState
@@ -95,11 +96,14 @@ instance ID BuildrootID where
 data TaskState = TaskFree | TaskOpen | TaskClosed | TaskCanceled | TaskAssigned | TaskFailed
   deriving (Eq, Enum, Show)
 
-openTaskStates :: Value
-openTaskStates = ValueArray $ map (ValueInt . fromEnum) [TaskFree, TaskOpen, TaskAssigned]
+openTaskStates :: [TaskState]
+openTaskStates = [TaskFree, TaskOpen, TaskAssigned]
 
---taskStateToValue :: TaskState -> Value
---taskStateToValue = ValueInt . fromEnum
+openTaskValues :: Value
+openTaskValues = ValueArray $ map taskStateToValue openTaskStates
+  where
+    taskStateToValue :: TaskState -> Value
+    taskStateToValue = ValueInt . fromEnum
 
 readTaskState :: Value -> TaskState
 readTaskState (ValueInt i) | i `elem` map fromEnum (enumFrom TaskFree) = toEnum i
