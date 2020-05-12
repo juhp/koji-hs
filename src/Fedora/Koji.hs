@@ -8,6 +8,7 @@ module Fedora.Koji
        , kojiGetTaskInfo
        , kojiGetTaskChildren
        , kojiGetUserID
+       , kojiLatestBuild
        , kojiListTaskIDs
        , PackageID(..)
        , TagID(..)
@@ -170,3 +171,8 @@ kojiGetTaskInfo tid = getTaskInfo (getID tid) False
 kojiGetTaskChildren :: TaskID -> Bool -> IO [Struct]
 kojiGetTaskChildren tid =
   getTaskChildren (getID tid)
+
+kojiLatestBuild :: String -- ^ tag
+                   -> String -- ^ pkg
+                   -> IO Value
+kojiLatestBuild tag pkg = getLatestBuilds (InfoString tag) Nothing (Just pkg) Nothing

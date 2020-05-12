@@ -384,13 +384,13 @@ getLastHostUpdate = koji "getLastHostUpdate"
 -- | getLatestBuilds(tag, event=None, package=None, type=None)
 --
 -- List latest builds for tag (inheritance enabled)
-getLatestBuilds :: String -- ^ tag
+getLatestBuilds :: Info -- ^ tag
                 -> Maybe Int -- ^ event
                 -> Maybe String -- ^ pkg
                 -> Maybe String -- ^ type
                 -> IO Value
 getLatestBuilds tag event pkg type_ =
-  koji "getLatestBuilds" tag (maybeInt event) (maybeString pkg) (maybeString type_)
+  koji "getLatestBuilds" (infoValue tag) (maybeInt event) (maybeString pkg) (maybeString type_)
 
 -- | getLatestMavenArchives(tag, event=None, inherit=True)
 getLatestMavenArchives :: String -> Maybe Int -> Bool -> IO Value
