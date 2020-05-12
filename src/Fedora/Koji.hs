@@ -174,6 +174,7 @@ kojiGetTaskChildren tid =
   getTaskChildren (getID tid)
 
 kojiLatestBuild :: String -- ^ tag
-                   -> String -- ^ pkg
-                   -> IO Value
-kojiLatestBuild tag pkg = getLatestBuilds (InfoString tag) Nothing (Just pkg) Nothing
+                -> String -- ^ pkg
+                -> IO (Maybe Struct)
+kojiLatestBuild tag pkg =
+  listToMaybe <$> getLatestBuilds (InfoString tag) Nothing (Just pkg) Nothing

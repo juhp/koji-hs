@@ -388,7 +388,7 @@ getLatestBuilds :: Info -- ^ tag
                 -> Maybe Int -- ^ event
                 -> Maybe String -- ^ pkg
                 -> Maybe String -- ^ type
-                -> IO Value
+                -> IO [Struct]
 getLatestBuilds tag event pkg type_ =
   koji "getLatestBuilds" (infoValue tag) (maybeInt event) (maybeString pkg) (maybeString type_)
 
