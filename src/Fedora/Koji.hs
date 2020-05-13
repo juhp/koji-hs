@@ -115,7 +115,7 @@ getTaskState st = readTaskState <$> lookup "state" st
 data BuildInfo = BuildInfoID Int | BuildInfoNVR String
 
 buildInfo :: BuildInfo -> Info
-buildInfo (BuildInfoID bid) = InfoID (bid)
+buildInfo (BuildInfoID bid) = InfoID bid
 buildInfo (BuildInfoNVR nvr) = InfoString nvr
 
 buildIDInfo :: BuildID -> BuildInfo
@@ -148,7 +148,7 @@ kojiGetUserID name = do
 kojiBuildTags :: BuildInfo -> IO [String]
 kojiBuildTags buildinfo = do
   lst <- listTags (Just (buildInfo buildinfo)) Nothing False
-  return $ (catMaybes . fmap (lookupStruct "name")) lst
+  return $ mapMaybe (lookupStruct "name") lst
 
 data BuildState = BuildBuilding | BuildComplete | BuildDeleted | BuildFailed | BuildCanceled
   deriving (Eq, Enum, Show)

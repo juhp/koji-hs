@@ -394,8 +394,8 @@ getLatestBuilds tag event pkg type_ =
 
 -- | getLatestMavenArchives(tag, event=None, inherit=True)
 getLatestMavenArchives :: String -> Maybe Int -> Bool -> IO Value
-getLatestMavenArchives tag event inherit =
-  koji "getLatestMavenArchives" tag (maybeInt event) inherit
+getLatestMavenArchives tag event =
+  koji "getLatestMavenArchives" tag (maybeInt event)
 
 -- | getLatestRPMS(tag, package=None, arch=None, event=None, rpmsigs=False, type=None)
 getLatestRPMS :: String -> Maybe String -> Maybe String -> Maybe Int -> Bool -> Maybe String -> IO Value
