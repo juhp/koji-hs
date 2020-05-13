@@ -496,8 +496,8 @@ getTaskDescendents = koji "getTaskDescendents"
 -- | getTaskInfo(task_id, request=False, strict=False)
 getTaskInfo :: Int
             -> Bool -- ^ include request details
-            -> IO Struct
-getTaskInfo = koji "getTaskInfo"
+            -> IO (Maybe Struct)
+getTaskInfo tid request = maybeStruct <$> koji "getTaskInfo" tid request
   -- res <- kojiCall "getTaskInfo" [show taskid]
   -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
   --     arch = res ^? key "arch" % _String

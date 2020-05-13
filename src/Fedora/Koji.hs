@@ -7,6 +7,7 @@ module Fedora.Koji
        , kojiGetBuildState
        , kojiGetTaskInfo
        , kojiGetTaskChildren
+       , kojiGetTaskState
        , kojiGetUserID
        , kojiLatestBuild
        , kojiListTaskIDs
@@ -93,25 +94,6 @@ instance ID BuildrootID where
   getID (BuildrootId i) = i
   mkID = BuildrootId
 
-data TaskState = TaskFree | TaskOpen | TaskClosed | TaskCanceled | TaskAssigned | TaskFailed
-  deriving (Eq, Enum, Show)
-
-openTaskStates :: [TaskState]
-openTaskStates = [TaskFree, TaskOpen, TaskAssigned]
-
-openTaskValues :: Value
-openTaskValues = ValueArray $ map taskStateToValue openTaskStates
-  where
-    taskStateToValue :: TaskState -> Value
-    taskStateToValue = ValueInt . fromEnum
-
-readTaskState :: Value -> TaskState
-readTaskState (ValueInt i) | i `elem` map fromEnum (enumFrom TaskFree) = toEnum i
-readTaskState _ = error "invalid task state"
-
-getTaskState :: Struct -> Maybe TaskState
-getTaskState st = readTaskState <$> lookup "state" st
-
 data BuildInfo = BuildInfoID Int | BuildInfoNVR String
 
 buildInfo :: BuildInfo -> Info
@@ -157,7 +139,6 @@ readBuildState :: Value -> BuildState
 readBuildState (ValueInt i) | i `elem` map fromEnum (enumFrom BuildBuilding) = toEnum i
 readBuildState _ = error "invalid build state"
 
-
 kojiGetBuildState :: BuildInfo -> IO (Maybe BuildState)
 kojiGetBuildState buildinfo = do
   mbuild <- getBuild (buildInfo buildinfo)
@@ -165,8 +146,34 @@ kojiGetBuildState buildinfo = do
     Nothing -> return Nothing
     Just build -> return $ readBuildState <$> lookupStruct "state" build
 
+data TaskState = TaskFree | TaskOpen | TaskClosed | TaskCanceled | TaskAssigned | TaskFailed
+  deriving (Eq, Enum, Show)
+
+openTaskStates :: [TaskState]
+openTaskStates = [TaskFree, TaskOpen, TaskAssigned]
+
+openTaskValues :: Value
+openTaskValues = ValueArray $ map taskStateToValue openTaskStates
+  where
+    taskStateToValue :: TaskState -> Value
+    taskStateToValue = ValueInt . fromEnum
+
+readTaskState :: Value -> TaskState
+readTaskState (ValueInt i) | i `elem` map fromEnum (enumFrom TaskFree) = toEnum i
+readTaskState _ = error "invalid task state"
+
+getTaskState :: Struct -> Maybe TaskState
+getTaskState st = readTaskState <$> lookup "state" st
+
+kojiGetTaskState :: TaskID -> IO (Maybe TaskState)
+kojiGetTaskState tid = do
+  mti <- getTaskInfo (getID tid) False
+  return $ case mti of
+             Nothing -> Nothing
+             Just ti -> readTaskState <$> lookupStruct "state" ti
+
 kojiGetTaskInfo :: TaskID
-                -> IO Struct
+                -> IO (Maybe Struct)
 kojiGetTaskInfo tid = getTaskInfo (getID tid) True
   -- res <- kojiCall "getTaskInfo" [show taskid]
   -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
