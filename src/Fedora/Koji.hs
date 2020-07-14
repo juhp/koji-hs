@@ -11,6 +11,8 @@ module Fedora.Koji
        , kojiGetUserID
        , kojiLatestBuild
        , kojiListTaskIDs
+       , KojiPackage(..)
+       , listTagPackages
        , PackageID(..)
        , TagID(..)
        , TaskID(..)
@@ -54,6 +56,10 @@ readID' st = lookup "id" st >>= getInt
 getInt :: Value -> Maybe Int
 getInt (ValueInt i) = Just i
 getInt _ = Nothing
+
+getString :: Value -> Maybe String
+getString (ValueString i) = Just i
+getString _ = Nothing
 
 newtype TaskID = TaskId Int
   deriving Show
@@ -189,3 +195,38 @@ kojiLatestBuild :: String -- ^ tag
                 -> IO (Maybe Struct)
 kojiLatestBuild tag pkg =
   listToMaybe <$> getLatestBuilds (InfoString tag) Nothing (Just pkg) Nothing
+
+data KojiPackage
+  = KojiPackage
+      { kpBuildId :: Int
+      , kpPackageId :: Int
+      , kpOwnerName :: String
+      , kpNvr :: String
+      }
+  deriving (Show)
+
+lookupInt :: String -> [(String, Value)] -> Maybe Int
+lookupInt k values = do
+  value <- lookup k values
+  getInt value
+
+lookupString :: String -> [(String, Value)] -> Maybe String
+lookupString k values = do
+  value <- lookup k values
+  getString value
+
+readPackage :: Value -> Maybe KojiPackage
+readPackage (ValueStruct values) = do
+  buildId <- lookupInt "build_id" values
+  packageId <- lookupInt "package_id" values
+  owner <- lookupString "owner_name" values
+  nvr <- lookupString "nvr" values
+  return $ KojiPackage buildId packageId owner nvr
+readPackage _ = Nothing
+
+listTagPackages :: Bool -> String -> IO [KojiPackage]
+listTagPackages latest tag = do
+  allValue <- listTagged tag Nothing False Nothing latest Nothing Nothing Nothing
+  return $ case allValue of
+    ValueArray allArray -> mapMaybe readPackage allArray
+    _ -> []
