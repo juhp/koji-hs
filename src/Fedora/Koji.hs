@@ -5,6 +5,7 @@ module Fedora.Koji
        , kojiBuildTags
        , kojiGetBuildID
        , kojiGetBuildState
+       , kojiGetBuildTaskID
        , kojiGetTaskInfo
        , kojiGetTaskChildren
        , kojiGetTaskState
@@ -104,12 +105,14 @@ buildIDInfo :: BuildID -> BuildInfo
 buildIDInfo (BuildId bid) = BuildInfoID bid
 
 kojiGetBuildID :: String -- ^ NVR
-           -> IO (Maybe BuildID)
-kojiGetBuildID nvr = do
-  mbuild <- getBuild $ InfoString nvr
-  case mbuild of
-    Nothing -> return Nothing
-    Just build -> return $ BuildId <$> lookupStruct "id" build
+               -> IO (Maybe BuildID)
+kojiGetBuildID nvr =
+  ((fmap BuildId . lookupStruct "id") =<<) <$> getBuild (InfoString nvr)
+
+kojiGetBuildTaskID :: String -- ^ NVR
+                   -> IO (Maybe TaskID)
+kojiGetBuildTaskID nvr =
+  ((fmap TaskId . lookupStruct "task_id") =<<) <$> getBuild (InfoString nvr)
 
 kojiListTaskIDs :: Struct -- ^ opts
           -> Struct -- ^ qopts
@@ -140,11 +143,9 @@ readBuildState (ValueInt i) | i `elem` map fromEnum (enumFrom BuildBuilding) = t
 readBuildState _ = error "invalid build state"
 
 kojiGetBuildState :: BuildInfo -> IO (Maybe BuildState)
-kojiGetBuildState buildinfo = do
-  mbuild <- getBuild (buildInfo buildinfo)
-  case mbuild of
-    Nothing -> return Nothing
-    Just build -> return $ readBuildState <$> lookupStruct "state" build
+kojiGetBuildState buildinfo =
+  ((fmap readBuildState . lookupStruct "state") =<<) <$>
+  getBuild (buildInfo buildinfo)
 
 data TaskState = TaskFree | TaskOpen | TaskClosed | TaskCanceled | TaskAssigned | TaskFailed
   deriving (Eq, Enum, Show)
