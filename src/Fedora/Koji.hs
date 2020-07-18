@@ -45,15 +45,14 @@ class ID a where
 displayID :: ID a => a -> String
 displayID = show . getID
 
+-- FIXME rename to structID ?
 readID :: ID a => Struct -> Maybe a
 readID st = lookup "id" st >>= fmap mkID . getInt
 
 readID' :: Struct -> Maybe Int
 readID' st = lookup "id" st >>= getInt
 
--- maybeID :: ID a => Maybe a -> Value
--- maybeID = maybe ValueNil ValueInt . fmap getID
-
+-- FIXME rename to valueInt ?
 getInt :: Value -> Maybe Int
 getInt (ValueInt i) = Just i
 getInt _ = Nothing

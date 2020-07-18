@@ -139,6 +139,7 @@ koji = remote hub
 --     handleResponse (Return v)       = return v
 --     handleResponse (Fault code str) = error ("Error " ++ show code ++ ": " ++ str)
 
+-- FIXME rename to newtype KojiStruct
 type Struct = [(String,Value)]
 
 maybeString :: Maybe String -> Value
