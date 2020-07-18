@@ -116,13 +116,14 @@ import Network.XmlRpc.Internals
 --import Network.HTTP.Client.Conduit
 import Control.Monad.Except (runExceptT)
 
-hub :: String
-hub = "https://koji.fedoraproject.org/kojihub"
+hubUrl :: String
+hubUrl = "https://koji.fedoraproject.org/kojihub"
 
 koji :: Remote a =>
-        String -- ^ command
+        String -- ^ kojihub url
+     -> String -- ^ command
      -> a
-koji = remote hub
+koji kojiHubUrl = remote kojiHubUrl
 
 -- xmlrpc :: String -> String -> [Value] -> IO Value
 -- xmlrpc url m args = do
@@ -205,11 +206,11 @@ maybeStruct _ = Nothing
 
 -- | checkTagAccess(tag_id, user_id=None)
 checkTagAccess :: Int -> Int -> IO Value
-checkTagAccess = koji "checkTagAccess"
+checkTagAccess = koji hubUrl "checkTagAccess"
 
 -- | checkTagPackage(tag, pkg)
 checkTagPackage :: Info -> Info -> IO Bool
-checkTagPackage taginfo pkginfo = koji "checkTagPackage" (infoValue taginfo) (infoValue pkginfo)
+checkTagPackage taginfo pkginfo = koji hubUrl "checkTagPackage" (infoValue taginfo) (infoValue pkginfo)
 
 -- count*
 
@@ -243,76 +244,76 @@ checkTagPackage taginfo pkginfo = koji "checkTagPackage" (infoValue taginfo) (in
 
 -- | getAPIVersion()
 getAPIVersion :: IO String
-getAPIVersion = koji "getAPIVersion"
+getAPIVersion = koji hubUrl "getAPIVersion"
 
 -- | getActiveRepos()
 getActiveRepos :: IO Value
-getActiveRepos = koji "getActiveRepos"
+getActiveRepos = koji hubUrl "getActiveRepos"
 
 -- | getAllArches
 getAllArches :: IO Value
-getAllArches = koji "getAllArches"
+getAllArches = koji hubUrl "getAllArches"
 
 -- | getAllPerms
 getAllPerms :: IO [Struct]
-getAllPerms = koji "getAllPerms"
+getAllPerms = koji hubUrl "getAllPerms"
 
 -- | getArchive(archive_id, strict=False)
 getArchive :: Int -> IO (Maybe Struct)
-getArchive = fmap maybeStruct . koji "getArchive"
+getArchive = fmap maybeStruct . koji hubUrl "getArchive"
 
 -- | getArchiveFile(archive_id, filename, strict=False)
 getArchiveFile :: Int -> FilePath -> IO (Maybe Struct)
-getArchiveFile archiveID file = maybeStruct <$> koji "getArchiveFile" archiveID file
+getArchiveFile archiveID file = maybeStruct <$> koji hubUrl "getArchiveFile" archiveID file
 
 -- | getArchiveType(filename=None, type_name=None, type_id=None, strict=False)
 getArchiveType :: Maybe FilePath -> Maybe String -> Maybe Int -> IO Value
 getArchiveType filename type_name type_id =
-  koji "getArchiveType" (maybeString filename) (maybeString type_name) (maybeInt type_id)
+  koji hubUrl "getArchiveType" (maybeString filename) (maybeString type_name) (maybeInt type_id)
 
 -- | getArchiveTypes()
 getArchiveTypes :: IO Value
-getArchiveTypes = koji "getArchiveTypes"
+getArchiveTypes = koji hubUrl "getArchiveTypes"
 
 -- | getAverageBuildDuration pkginfo
 getAverageBuildDuration :: Info -> IO Value
-getAverageBuildDuration = koji "getAverageBuildDuration" . infoValue
+getAverageBuildDuration = koji hubUrl "getAverageBuildDuration" . infoValue
 
 -- | getBuild(buildInfo, strict=False)
 getBuild :: Info -- ^ buildID
          -> IO (Maybe Struct)
-getBuild = fmap maybeStruct . koji "getBuild" . infoValue
+getBuild = fmap maybeStruct . koji hubUrl "getBuild" . infoValue
 
 -- | getBuildConfig tag
 getBuildConfig :: String -> IO Value
-getBuildConfig = koji "getBuildConfig"
+getBuildConfig = koji hubUrl "getBuildConfig"
 
 -- | getBuildLogs build
 getBuildLogs :: Info -- ^ buildinfo
              -> IO Value
-getBuildLogs = koji "getBuildLogs" . infoValue
+getBuildLogs = koji hubUrl "getBuildLogs" . infoValue
 
 -- | getBuildTarget info
 getBuildTarget :: String -> IO Value
-getBuildTarget = koji "getBuildTarget"
+getBuildTarget = koji hubUrl "getBuildTarget"
 
 -- | getBuildTargets info event buildTagID destTagID
 getBuildTargets :: Maybe Info -> Maybe Int -> Maybe Int -> Maybe Int -> IO Value
 getBuildTargets info event buildTagId destTagId  =
-  koji "getBuildTargets" (maybeInfo info) (maybeInt event) (maybeInt buildTagId) (maybeInt destTagId)
+  koji hubUrl "getBuildTargets" (maybeInfo info) (maybeInt event) (maybeInt buildTagId) (maybeInt destTagId)
 
 -- | getBuildType buildinfo
 getBuildType :: Info -- ^ buildinfo
              -> IO Value
-getBuildType = koji "getBuildType" . infoValue
+getBuildType = koji hubUrl "getBuildType" . infoValue
 
 -- | getBuildroot buildrootId
 getBuildroot :: Int -> IO Value
-getBuildroot = koji "getBuildroot"
+getBuildroot = koji hubUrl "getBuildroot"
 
 -- | getBuildrootListing buildrootId
 getBuildrootListing :: Int -> IO Value
-getBuildrootListing = koji "getBuildrootListing"
+getBuildrootListing = koji hubUrl "getBuildrootListing"
 
 -- | getChangelogEntries(buildID=None, taskID=None, filepath=None, author=None, before=None, after=None, queryOpts=None)
 getChangelogEntries :: Maybe Int -- ^ buildID
@@ -323,64 +324,64 @@ getChangelogEntries :: Maybe Int -- ^ buildID
                     -> Maybe String -- ^ after
                     -> IO [Struct]
 getChangelogEntries buildID taskID filepath author before after =
-  koji "getChangelogEntries" (maybeInt buildID) (maybeInt taskID) (maybeString filepath) (maybeString author) (maybeString before) (maybeString after)
+  koji hubUrl "getChangelogEntries" (maybeInt buildID) (maybeInt taskID) (maybeString filepath) (maybeString author) (maybeString before) (maybeString after)
 
 -- | getChannel channelinfo
 getChannel :: Info -> IO Value
-getChannel = koji "getChannel" . infoValue
+getChannel = koji hubUrl "getChannel" . infoValue
 
 -- | getEvent eventid
 getEvent :: Int -> IO Struct
-getEvent = koji "getEvent"
+getEvent = koji hubUrl "getEvent"
 
 -- | getExternalRepo info
 getExternalRepo :: Info -> Maybe Int -> IO Struct
 getExternalRepo info event =
-  koji "getExternalRepo" (infoValue info) () (maybeInt event)
+  koji hubUrl "getExternalRepo" (infoValue info) () (maybeInt event)
 
 -- | getExternalRepoList(tag_info, event=None)
 getExternalRepoList :: Info -> Maybe Int -> IO [Struct]
 getExternalRepoList info event =
-  koji "getExternalRepoList" (infoValue info) (maybeInt event)
+  koji hubUrl "getExternalRepoList" (infoValue info) (maybeInt event)
 
 -- | getFullInheritance(tag, event=None, reverse=False, stops=None, jumps=None)
 getFullInheritance :: String -> Maybe Int -> Bool -> IO Value
 getFullInheritance tag event =
-  koji "getFullInheritance" tag (maybeInt event)
+  koji hubUrl "getFullInheritance" tag (maybeInt event)
 
 -- | getGlobalInheritance(event=None)
 getGlobalInheritance :: Maybe Int -> IO Value
-getGlobalInheritance = koji "getGlobalInheritance" . maybeInt
+getGlobalInheritance = koji hubUrl "getGlobalInheritance" . maybeInt
 
 -- | getGroupMembers(group)
 getGroupMembers :: String -> IO Value
-getGroupMembers = koji "getGroupMembers"
+getGroupMembers = koji hubUrl "getGroupMembers"
 
 -- | getHost(hostInfo, strict=False, event=None)
 getHost :: Info -> Maybe Int -> IO Struct
-getHost info = koji "getHost" (infoValue info) () . maybeInt
+getHost info = koji hubUrl "getHost" (infoValue info) () . maybeInt
 
 -- | getImageArchive(archive_id, strict=False)
 getImageArchive :: Int -> IO Struct
-getImageArchive = koji "getImageArchive"
+getImageArchive = koji hubUrl "getImageArchive"
 
 -- | getImageBuild(buildInfo, strict=False)
 getImageBuild :: Info -> IO Struct
-getImageBuild info = koji "getImageBuild" (infoValue info)
+getImageBuild info = koji hubUrl "getImageBuild" (infoValue info)
 
 -- | getInheritanceData(tag, event=None)
 getInheritanceData :: String -> Maybe Int -> IO Value
 getInheritanceData tag event =
-  koji "getInheritanceData" tag (maybeInt event)
+  koji hubUrl "getInheritanceData" tag (maybeInt event)
 
 
 -- | getLastEvent(before=None)
 getLastEvent :: Maybe Int -> IO Value
-getLastEvent = koji "getLastEvent" . maybeInt
+getLastEvent = koji hubUrl "getLastEvent" . maybeInt
 
 -- | getLastHostUpdate(hostID)
 getLastHostUpdate :: Int -> IO Value
-getLastHostUpdate = koji "getLastHostUpdate"
+getLastHostUpdate = koji hubUrl "getLastHostUpdate"
 
 -- | getLatestBuilds(tag, event=None, package=None, type=None)
 --
@@ -391,114 +392,114 @@ getLatestBuilds :: Info -- ^ tag
                 -> Maybe String -- ^ type
                 -> IO [Struct]
 getLatestBuilds tag event pkg type_ =
-  koji "getLatestBuilds" (infoValue tag) (maybeInt event) (maybeString pkg) (maybeString type_)
+  koji hubUrl "getLatestBuilds" (infoValue tag) (maybeInt event) (maybeString pkg) (maybeString type_)
 
 -- | getLatestMavenArchives(tag, event=None, inherit=True)
 getLatestMavenArchives :: String -> Maybe Int -> Bool -> IO Value
 getLatestMavenArchives tag event =
-  koji "getLatestMavenArchives" tag (maybeInt event)
+  koji hubUrl "getLatestMavenArchives" tag (maybeInt event)
 
 -- | getLatestRPMS(tag, package=None, arch=None, event=None, rpmsigs=False, type=None)
 getLatestRPMS :: String -> Maybe String -> Maybe String -> Maybe Int -> Bool -> Maybe String -> IO Value
 getLatestRPMS tag pkg arch event rpmsigs type_ =
-  koji "getLatestRPMS" tag (maybeString pkg) (maybeString arch) (maybeInt event) rpmsigs (maybeString type_)
+  koji hubUrl "getLatestRPMS" tag (maybeString pkg) (maybeString arch) (maybeInt event) rpmsigs (maybeString type_)
 
 -- getLoggedInUser()
 
 -- | getMavenArchive(archive_id, strict=False)
 getMavenArchive :: Int -> IO Struct
-getMavenArchive = koji "getMavenArchive"
+getMavenArchive = koji hubUrl "getMavenArchive"
 
 -- | getMavenBuild(buildInfo, strict=False)
 getMavenBuild :: Info -> IO Struct
-getMavenBuild info = koji "getMavenBuild" (infoValue info)
+getMavenBuild info = koji hubUrl "getMavenBuild" (infoValue info)
 
 -- | getNextRelease(build_info)
 --
 -- find the last successful or deleted build of this N-V.
 -- If building is specified, skip also builds in progress
 getNextRelease :: Info -> IO Value
-getNextRelease info = koji "getNextRelease" (infoValue info)
+getNextRelease info = koji hubUrl "getNextRelease" (infoValue info)
 
 -- | getPackage(info, strict=False, create=False)
 --
 -- Get the id,name for package
 getPackage :: Info -> IO Value
-getPackage info = koji "getPackage" (infoValue info)
+getPackage info = koji hubUrl "getPackage" (infoValue info)
 
 -- | getPackageConfig(tag, pkg, event=None)
 --
 -- Get config for package in tag
 getPackageConfig :: String -> String -> Maybe Int -> IO Value
 getPackageConfig tag pkg event =
-  koji "getPackageConfig" tag pkg (maybeInt event)
+  koji hubUrl "getPackageConfig" tag pkg (maybeInt event)
 
 -- | getPackageID(name, strict=False)
 --
 -- Get package ID by name.
 getPackageID :: String -> IO (Maybe Int)
 getPackageID pkg = do
-  res <- koji "getPackageID" pkg
+  res <- koji hubUrl "getPackageID" pkg
   case res of
     ValueInt i -> return $ Just i
     _ -> return Nothing
 
 -- | getRPM(rpminfo, strict=False, multi=False)
 getRPM :: Info -> IO Struct
-getRPM = koji "getRPM" . infoValue
+getRPM = koji hubUrl "getRPM" . infoValue
 
 -- | getRPMDeps(rpmID, depType=None, queryOpts=None, strict=False)
 getRPMDeps :: Int -> Maybe String -> IO [Struct]
 getRPMDeps rpmid deptype =
-  koji "getRPMDeps" rpmid (maybeString deptype)
+  koji hubUrl "getRPMDeps" rpmid (maybeString deptype)
 
 -- | getRPMFile(rpmID, filename, strict=False)
 getRPMFile :: Int -> FilePath -> IO Struct
-getRPMFile = koji "getRPMFile"
+getRPMFile = koji hubUrl "getRPMFile"
 
 -- | getRPMHeaders(rpmID=None, taskID=None, filepath=None, headers=None)
 getRPMHeaders :: Maybe Int -> Maybe Int -> Maybe FilePath -> Maybe Value -> IO Struct
 getRPMHeaders rpmid taskid file headers =
-  koji "getRPMHeaders" (maybeInt rpmid) (maybeInt taskid) (maybeString file) (fromMaybe ValueNil headers)
+  koji hubUrl "getRPMHeaders" (maybeInt rpmid) (maybeInt taskid) (maybeString file) (fromMaybe ValueNil headers)
 
 -- | getRepo(tag, state=None, event=None, dist=False)
 getRepo :: String -> Maybe Int -> Maybe Int -> Bool -> IO Value
 getRepo tag state event =
-  koji "getRepo" tag (maybeInt state) (maybeInt event)
+  koji hubUrl "getRepo" tag (maybeInt state) (maybeInt event)
 
 -- getSessionInfo()
 
 -- | getTag(tagInfo, strict=False, event=None)
 getTag :: Info -> Maybe Int -> IO Struct
-getTag info = koji "getTag" (infoValue info) () . maybeInt
+getTag info = koji hubUrl "getTag" (infoValue info) () . maybeInt
 
 -- | getTagExternalRepos(tag_info=None, repo_info=None, event=None)
 getTagExternalRepos :: Maybe Info -> Maybe Info -> Maybe Int -> IO Struct
 getTagExternalRepos taginfo repoinfo event =
-  koji "getTagExternalRepos" (maybeInfo taginfo) (maybeInfo repoinfo) (maybeInt event)
+  koji hubUrl "getTagExternalRepos" (maybeInfo taginfo) (maybeInfo repoinfo) (maybeInt event)
 
 -- | getTagGroups(tag, event=None, inherit=True, incl_pkgs=True, incl_reqs=True, incl_blocked=False)
 getTagGroups :: String -> Maybe Int -> Bool -> Bool -> Bool -> Bool -> IO Value
 getTagGroups tag event =
-  koji "getTagGroups" tag (maybeInt event)
+  koji hubUrl "getTagGroups" tag (maybeInt event)
 
 -- | getTagID(info, strict=False, create=False)
 getTagID :: Info -> IO Value
-getTagID = koji "getTagID" . infoValue
+getTagID = koji hubUrl "getTagID" . infoValue
 
 -- | getTaskChildren(task_id, request=False, strict=False)
 getTaskChildren :: Int -> Bool -> IO [Struct]
-getTaskChildren = koji "getTaskChildren"
+getTaskChildren = koji hubUrl "getTaskChildren"
 
 -- | getTaskDescendents(task_id, request=False)
 getTaskDescendents :: Int -> Bool -> IO Struct
-getTaskDescendents = koji "getTaskDescendents"
+getTaskDescendents = koji hubUrl "getTaskDescendents"
 
 -- | getTaskInfo(task_id, request=False, strict=False)
 getTaskInfo :: Int
             -> Bool -- ^ include request details
             -> IO (Maybe Struct)
-getTaskInfo tid request = maybeStruct <$> koji "getTaskInfo" tid request
+getTaskInfo tid request = maybeStruct <$> koji hubUrl "getTaskInfo" tid request
   -- res <- kojiCall "getTaskInfo" [show taskid]
   -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
   --     arch = res ^? key "arch" % _String
@@ -506,32 +507,32 @@ getTaskInfo tid request = maybeStruct <$> koji "getTaskInfo" tid request
 
 -- | getTaskRequest(taskId)
 getTaskRequest :: Int -> IO Value
-getTaskRequest = koji "getTaskRequest"
+getTaskRequest = koji hubUrl "getTaskRequest"
 
 -- | getTaskResult(taskId, raise_fault=True)
 getTaskResult :: Int -> IO Value
-getTaskResult = koji "getTaskResult"
+getTaskResult = koji hubUrl "getTaskResult"
 
 -- | getUser(userInfo=None, strict=False, krb_princs=True)
 getUser :: Info -> Bool -> IO (Maybe Struct)
 getUser info krbprncpl =
-  maybeStruct <$> koji "getUser" (infoValue info) () krbprncpl
+  maybeStruct <$> koji hubUrl "getUser" (infoValue info) () krbprncpl
 
 -- | getUserPerms(userID=None)
 getUserPerms :: Maybe Info -> IO Value
-getUserPerms = koji "getUserPerms" . maybeInfo
+getUserPerms = koji hubUrl "getUserPerms" . maybeInfo
 
 -- | getVolume(volume, strict=False)
 getVolume :: Info -> IO Value
-getVolume = koji "getVolume" . infoValue
+getVolume = koji hubUrl "getVolume" . infoValue
 
 -- | getWinArchive(archive_id, strict=False)
 getWinArchive :: Int -> IO Struct
-getWinArchive = koji "getWinArchive"
+getWinArchive = koji hubUrl "getWinArchive"
 
 -- | getWinBuild(buildInfo, strict=False)
 getWinBuild :: Info -> IO (Maybe Struct)
-getWinBuild = fmap maybeStruct . koji "getWinBuild" . infoValue
+getWinBuild = fmap maybeStruct . koji hubUrl "getWinBuild" . infoValue
 
 -- grantCGAccess(user, cg, create=False)
 
@@ -556,7 +557,7 @@ getWinBuild = fmap maybeStruct . koji "getWinBuild" . infoValue
 -- hasPerm(perm, strict=False)
 
 hello :: IO String
-hello = koji "hello"
+hello = koji hubUrl "hello"
 
 -- host.* [skipped]
 
@@ -568,113 +569,113 @@ hello = koji "hello"
 
 -- | listArchiveFiles(archive_id, queryOpts=None, strict=False)
 listArchiveFiles :: Int -> IO [Struct]
-listArchiveFiles = koji "listArchiveFiles"
+listArchiveFiles = koji hubUrl "listArchiveFiles"
 
 -- | listArchives(buildID=None, buildrootID=None, componentBuildrootID=None, hostID=None, type=None, filename=None, size=None, checksum=None, typeInfo=None, queryOpts=None, imageID=None, archiveID=None, strict=False)
 listArchives :: Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe String -> Maybe FilePath -> Maybe Int -> Maybe String -> Maybe Info -> Maybe Int -> Maybe Int -> IO [Struct]
 listArchives buildID buildrootID componentBuildrootID hostID type_ file size checksum typeInfo imageID archiveID =
-  koji "listArchives" (maybeInt buildID) (maybeInt buildrootID) (maybeInt componentBuildrootID) (maybeInt hostID) (maybeString type_) (maybeString file) (maybeInt size) (maybeString checksum) (maybeInfo typeInfo) () (maybeInt imageID) (maybeInt archiveID)
+  koji hubUrl "listArchives" (maybeInt buildID) (maybeInt buildrootID) (maybeInt componentBuildrootID) (maybeInt hostID) (maybeString type_) (maybeString file) (maybeInt size) (maybeString checksum) (maybeInfo typeInfo) () (maybeInt imageID) (maybeInt archiveID)
 
 -- | listBTypes(query=None, queryOpts=None)
 listBTypes :: Value -> IO Value
-listBTypes = koji "listBTypes"
+listBTypes = koji hubUrl "listBTypes"
 
 -- | listBuildRPMs(build)
 listBuildRPMs :: Int -> IO [Struct]
-listBuildRPMs = koji "listBuildRPMs"
+listBuildRPMs = koji hubUrl "listBuildRPMs"
 
 -- | listBuildroots(hostID=None, tagID=None, state=None, rpmID=None, archiveID=None, taskID=None, buildrootID=None, queryOpts=None)
 listBuildroots :: Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> IO Value
 listBuildroots hostID tagID state rpmID archiveID taskID buildrootID =
-  koji "listBuildroots" (maybeInt hostID) (maybeInt tagID) (maybeInt state) (maybeInt rpmID) (maybeInt archiveID) (maybeInt taskID) (maybeInt buildrootID)
+  koji hubUrl "listBuildroots" (maybeInt hostID) (maybeInt tagID) (maybeInt state) (maybeInt rpmID) (maybeInt archiveID) (maybeInt taskID) (maybeInt buildrootID)
 
 -- | listBuilds (packageID=None, userID=None, taskID=None, prefix=None, state=None, volumeID=None, source=None, createdBefore=None, createdAfter=None, completeBefore=None, completeAfter=None, type=None, typeInfo=None, queryOpts=None)
 listBuilds :: Struct -> IO [Struct]
 listBuilds args =
   let maybeArg fld = maybeValue (lookupStruct fld args) in
-    koji "listBuilds" (maybeArg "packageID") (maybeArg "userID") (maybeArg "taskID") (maybeArg "prefix") (maybeArg "state") (maybeArg "volumeID") (maybeArg "source") (maybeArg "createdBefore") (maybeArg "createdAfter") (maybeArg "completeBefore") (maybeArg "completeAfter") (maybeArg "type") (maybeArg "typeInfo") (maybeArg "queryOpts")
+    koji hubUrl "listBuilds" (maybeArg "packageID") (maybeArg "userID") (maybeArg "taskID") (maybeArg "prefix") (maybeArg "state") (maybeArg "volumeID") (maybeArg "source") (maybeArg "createdBefore") (maybeArg "createdAfter") (maybeArg "completeBefore") (maybeArg "completeAfter") (maybeArg "type") (maybeArg "typeInfo") (maybeArg "queryOpts")
 
 -- | listCGs()
 listCGs :: IO Struct
-listCGs = koji "listCGs"
+listCGs = koji hubUrl "listCGs"
 
 -- | listChannels(hostID=None, event=None)
 listChannels :: Maybe Int -> Maybe Int -> IO Value
 listChannels hostID event =
-  koji "listChannels" (maybeInt hostID) (maybeInt event)
+  koji hubUrl "listChannels" (maybeInt hostID) (maybeInt event)
 
 -- | listExternalRepos(info=None, url=None, event=None, queryOpts=None)
 listExternalRepos :: Maybe Info -> Maybe String -> Maybe Int -> IO Value
 listExternalRepos info url event =
-  koji "listExternalRepos" (maybeInfo info) (maybeString url) (maybeInt event)
+  koji hubUrl "listExternalRepos" (maybeInfo info) (maybeString url) (maybeInt event)
 
 -- | listHosts(arches=None, channelID=None, ready=None, enabled=None, userID=None, queryOpts=None)
 listHosts :: Maybe Value -> Maybe Int -> Bool -> Bool -> Maybe Int -> IO Value
 listHosts arches channelID ready enabled userID =
-  koji "listHosts" (maybeValue arches) (maybeInt channelID) ready enabled (maybeInt userID)
+  koji hubUrl "listHosts" (maybeValue arches) (maybeInt channelID) ready enabled (maybeInt userID)
 
 -- | listPackages(tagID=None, userID=None, pkgID=None, prefix=None, inherited=False, with_dups=False, event=None, queryOpts=None)
 listPackages :: Maybe Int -> Maybe Int -> Maybe Int -> Maybe String -> Bool -> Bool -> Maybe Int -> IO [Struct]
 listPackages tagID userID pkgID prefix inherited with_dups event =
-  koji "listPackages" (maybeInt tagID) (maybeInt userID) (maybeInt pkgID) (maybeString prefix) inherited with_dups (maybeInt event)
+  koji hubUrl "listPackages" (maybeInt tagID) (maybeInt userID) (maybeInt pkgID) (maybeString prefix) inherited with_dups (maybeInt event)
 
 -- | listPackagesSimple prefix
 listPackagesSimple :: String -- ^ package name search prefix
                    -> IO [Struct]
-listPackagesSimple = koji "listPackagesSimple"
+listPackagesSimple = koji hubUrl "listPackagesSimple"
 
 -- | listRPMFiles(rpmID, queryOpts=None)
 listRPMFiles :: Int -> IO [Struct]
-listRPMFiles = koji "listRPMFiles"
+listRPMFiles = koji hubUrl "listRPMFiles"
 
 -- | listRPMs(buildID=None, buildrootID=None, imageID=None, componentBuildrootID=None, hostID=None, arches=None, queryOpts=None)
 listRPMs :: Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe Value -> IO [Struct]
 listRPMs buildID buildrootID imageID componentBuildrootID hostID arches =
-  koji "listRPMs" (maybeInt buildID) (maybeInt buildrootID) (maybeInt imageID) (maybeInt componentBuildrootID) (maybeInt hostID) (maybeValue arches)
+  koji hubUrl "listRPMs" (maybeInt buildID) (maybeInt buildrootID) (maybeInt imageID) (maybeInt componentBuildrootID) (maybeInt hostID) (maybeValue arches)
 
 -- | listSideTags(basetag=None, user=None, queryOpts=None)
 listSideTags :: Maybe Info -> Maybe Info -> IO Value
 listSideTags basetag user =
-  koji "listSideTags" (maybeInfo basetag) (maybeInfo user)
+  koji hubUrl "listSideTags" (maybeInfo basetag) (maybeInfo user)
 
 -- | listTagged(tag, event=None, inherit=False, prefix=None, latest=False, package=None, owner=None, type=None)
 listTagged :: String -> Maybe Int -> Bool -> Maybe String -> Bool -> Maybe String -> Maybe String -> Maybe String -> IO Value
 listTagged tag event inherit prefix latest package owner type_ =
-  koji "listTagged" tag (maybeInt event) inherit (maybeString prefix) latest (maybeString package) (maybeString owner) (maybeString type_)
+  koji hubUrl "listTagged" tag (maybeInt event) inherit (maybeString prefix) latest (maybeString package) (maybeString owner) (maybeString type_)
 
 -- | listTaggedArchives(tag, event=None, inherit=False, latest=False, package=None, type=None)
 listTaggedArchives :: String -> Maybe Int -> Bool -> Bool -> Maybe String -> Maybe String -> IO Value
 listTaggedArchives tag event inherit latest package type_ =
-  koji "listTaggedArchives" tag (maybeInt event) inherit latest (maybeString package) (maybeString type_)
+  koji hubUrl "listTaggedArchives" tag (maybeInt event) inherit latest (maybeString package) (maybeString type_)
 
 -- | listTaggedRPMS(tag, event=None, inherit=False, latest=False, package=None, arch=None, rpmsigs=False, owner=None, type=None)
 listTaggedRPMS :: String -> Maybe Int -> Bool -> Bool -> Maybe String ->  Maybe String -> Bool -> Maybe String -> Maybe String -> IO Value
 listTaggedRPMS tag event inherit latest package arch rpmsigs owner type_ =
-  koji "listTaggedRPMS" tag (maybeInt event) inherit latest (maybeString package) (maybeString arch) rpmsigs (maybeString owner) (maybeString type_)
+  koji hubUrl "listTaggedRPMS" tag (maybeInt event) inherit latest (maybeString package) (maybeString arch) rpmsigs (maybeString owner) (maybeString type_)
 
 -- | listTags(build=None, package=None, perms=True, queryOpts=None)
 listTags :: Maybe Info -> Maybe Info -> Bool -> IO [Struct]
 listTags build package =
-  koji "listTags" (maybeInfo build) (maybeInfo package)
+  koji hubUrl "listTags" (maybeInfo build) (maybeInfo package)
 
 -- | listTaskOutput(taskID, stat=False, all_volumes=False, strict=False)
 listTaskOutput :: Int -> Bool -> Bool -> Bool -> IO Struct
-listTaskOutput = koji "listTaskOutput"
+listTaskOutput = koji hubUrl "listTaskOutput"
 
 -- | listTasks(opts=None, queryOpts=None)
 listTasks :: Struct -- ^ opts
           -> Struct -- ^ qopts
           -> IO [Struct]
-listTasks = koji "listTasks"
+listTasks = koji hubUrl "listTasks"
 
 -- | listUsers(userType=0, prefix=None, queryOpts=None)
 listUsers :: Maybe Int -> Maybe String -> IO [Struct]
 listUsers userType prefix =
-  koji "listUsers" (maybeInt userType) (maybeString prefix)
+  koji hubUrl "listUsers" (maybeInt userType) (maybeString prefix)
 
 -- | listVolumes()
 listVolumes :: IO Value
-listVolumes = koji "listVolumes"
+listVolumes = koji hubUrl "listVolumes"
 
 -- login(*args, **opts)
 
@@ -720,7 +721,7 @@ listVolumes = koji "listVolumes"
 
 -- | repoInfo(repo_id, strict=False)
 repoInfo :: Int -> IO Value
-repoInfo = koji "repoInfo"
+repoInfo = koji hubUrl "repoInfo"
 
 -- resetBuild(build)
 
@@ -728,7 +729,7 @@ repoInfo = koji "repoInfo"
 
 -- | resubmitTask(taskID)
 resubmitTask :: Int -> IO Value
-resubmitTask = koji "resubmitTask"
+resubmitTask = koji hubUrl "resubmitTask"
 
 -- revoke*
 
@@ -756,20 +757,20 @@ resubmitTask = koji "resubmitTask"
 
 -- | tagChangedSinceEvent(event, taglist)
 tagChangedSinceEvent :: Int -> Value -> IO Bool
-tagChangedSinceEvent = koji "tagChangedSinceEvent"
+tagChangedSinceEvent = koji hubUrl "tagChangedSinceEvent"
 
 -- | tagHistory(build=None, tag=None, package=None, active=None, queryOpts=None)
 tagHistory :: Maybe Info -> Maybe Info -> Maybe Info -> Bool -> IO Value
 tagHistory build tag package =
-  koji "tagHistory" (maybeInfo build) (maybeInfo tag) (maybeInfo package)
+  koji hubUrl "tagHistory" (maybeInfo build) (maybeInfo tag) (maybeInfo package)
 
 -- | taskFinished(taskId)
 taskFinished :: Int -> IO Bool
-taskFinished = koji "taskFinished"
+taskFinished = koji hubUrl "taskFinished"
 
 -- | taskReport(owner=None)
 taskReport :: Maybe String -> IO Value
-taskReport = koji "taskReport" . maybeString
+taskReport = koji hubUrl "taskReport" . maybeString
 
 -- untag*
 
