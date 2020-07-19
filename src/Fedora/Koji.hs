@@ -122,8 +122,8 @@ kojiGetBuildTaskID nvr =
   ((fmap TaskId . lookupStruct "task_id") =<<) <$> getBuild (InfoString nvr)
 
 kojiListTaskIDs :: Struct -- ^ opts
-          -> Struct -- ^ qopts
-          -> IO [TaskID]
+                -> Struct -- ^ qopts
+                -> IO [TaskID]
 kojiListTaskIDs opts qopts =
   mapMaybe readID <$> listTasks opts qopts
 
