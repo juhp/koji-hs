@@ -12,6 +12,7 @@ module Fedora.Koji
        , kojiGetUserID
        , kojiLatestBuild
        , kojiListTaskIDs
+       , kojiUserBuildTasks
        , KojiBuild(..)
        , kojiListTaggedBuilds
        , PackageID(..)
@@ -33,6 +34,7 @@ module Fedora.Koji
        )
 where
 
+import Data.List
 import Data.Maybe
 import Network.XmlRpc.Internals
 
@@ -124,6 +126,20 @@ kojiListTaskIDs :: Struct -- ^ opts
           -> IO [TaskID]
 kojiListTaskIDs opts qopts =
   mapMaybe readID <$> listTasks opts qopts
+
+kojiUserBuildTasks :: UserID -> Maybe String -> Maybe String -> IO [TaskID]
+kojiUserBuildTasks userid msource mtarget = do
+  tasks <- listTasks [("owner",ValueInt (getID userid)),("method",ValueString "build"),("state",openTaskValues)] []
+  return $ map TaskId . mapMaybe (lookupStruct "id") $ filter isTheBuild tasks
+  where
+    isTheBuild :: Struct -> Bool
+    isTheBuild st =
+      let mreq = lookupStruct "request" st in
+        case mreq of
+          Nothing -> False
+          Just req ->
+            maybe True (`isInfixOf` req) msource &&
+            maybe True (\ target -> ("<value><string>" ++ target ++ "</string></value>") `isInfixOf` req) mtarget
 
 -- getTagID :: String -- ^ tag
 --          -> IO TagID
