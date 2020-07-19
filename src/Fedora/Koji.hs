@@ -111,25 +111,28 @@ buildInfo (BuildInfoNVR nvr) = InfoString nvr
 buildIDInfo :: BuildID -> BuildInfo
 buildIDInfo (BuildId bid) = BuildInfoID bid
 
-kojiGetBuildID :: String -- ^ NVR
+kojiGetBuildID :: String -- ^ hub url
+               -> String -- ^ NVR
                -> IO (Maybe BuildID)
-kojiGetBuildID nvr =
-  ((fmap BuildId . lookupStruct "id") =<<) <$> getBuild (InfoString nvr)
+kojiGetBuildID hubUrl nvr =
+  ((fmap BuildId . lookupStruct "id") =<<) <$> getBuild hubUrl (InfoString nvr)
 
-kojiGetBuildTaskID :: String -- ^ NVR
+kojiGetBuildTaskID :: String -- ^ hub url
+                   -> String -- ^ NVR
                    -> IO (Maybe TaskID)
-kojiGetBuildTaskID nvr =
-  ((fmap TaskId . lookupStruct "task_id") =<<) <$> getBuild (InfoString nvr)
+kojiGetBuildTaskID hubUrl nvr =
+  ((fmap TaskId . lookupStruct "task_id") =<<) <$> getBuild hubUrl (InfoString nvr)
 
-kojiListTaskIDs :: Struct -- ^ opts
+kojiListTaskIDs :: String
+                -> Struct -- ^ opts
                 -> Struct -- ^ qopts
                 -> IO [TaskID]
-kojiListTaskIDs opts qopts =
-  mapMaybe readID <$> listTasks opts qopts
+kojiListTaskIDs hubUrl opts qopts =
+  mapMaybe readID <$> listTasks hubUrl opts qopts
 
-kojiUserBuildTasks :: UserID -> Maybe String -> Maybe String -> IO [TaskID]
-kojiUserBuildTasks userid msource mtarget = do
-  tasks <- listTasks [("owner",ValueInt (getID userid)),("method",ValueString "build"),("state",openTaskValues)] []
+kojiUserBuildTasks :: String -> UserID -> Maybe String -> Maybe String -> IO [TaskID]
+kojiUserBuildTasks hubUrl userid msource mtarget = do
+  tasks <- listTasks hubUrl [("owner",ValueInt (getID userid)),("method",ValueString "build"),("state",openTaskValues)] []
   return $ map TaskId . mapMaybe (lookupStruct "id") $ filter isTheBuild tasks
   where
     isTheBuild :: Struct -> Bool
@@ -146,14 +149,14 @@ kojiUserBuildTasks userid msource mtarget = do
 -- getTagID tag =
 --   TagId <$> koji "getTagID" tag
 
-kojiGetUserID :: String -> IO (Maybe UserID)
-kojiGetUserID name = do
-  res <- getUser (InfoString name) False
+kojiGetUserID :: String -> String -> IO (Maybe UserID)
+kojiGetUserID hubUrl name = do
+  res <- getUser hubUrl (InfoString name) False
   return $ readID =<< res
 
-kojiBuildTags :: BuildInfo -> IO [String]
-kojiBuildTags buildinfo = do
-  lst <- listTags (Just (buildInfo buildinfo)) Nothing False
+kojiBuildTags :: String -> BuildInfo -> IO [String]
+kojiBuildTags hubUrl buildinfo = do
+  lst <- listTags hubUrl (Just (buildInfo buildinfo)) Nothing False
   return $ mapMaybe (lookupStruct "name") lst
 
 data BuildState = BuildBuilding | BuildComplete | BuildDeleted | BuildFailed | BuildCanceled
@@ -163,10 +166,10 @@ readBuildState :: Value -> BuildState
 readBuildState (ValueInt i) | i `elem` map fromEnum (enumFrom BuildBuilding) = toEnum i
 readBuildState _ = error "invalid build state"
 
-kojiGetBuildState :: BuildInfo -> IO (Maybe BuildState)
-kojiGetBuildState buildinfo =
+kojiGetBuildState :: String -> BuildInfo -> IO (Maybe BuildState)
+kojiGetBuildState hubUrl buildinfo =
   ((fmap readBuildState . lookupStruct "state") =<<) <$>
-  getBuild (buildInfo buildinfo)
+  getBuild hubUrl (buildInfo buildinfo)
 
 data TaskState = TaskFree | TaskOpen | TaskClosed | TaskCanceled | TaskAssigned | TaskFailed
   deriving (Eq, Enum, Show)
@@ -187,30 +190,32 @@ readTaskState _ = error "invalid task state"
 getTaskState :: Struct -> Maybe TaskState
 getTaskState st = readTaskState <$> lookup "state" st
 
-kojiGetTaskState :: TaskID -> IO (Maybe TaskState)
-kojiGetTaskState tid = do
-  mti <- getTaskInfo (getID tid) False
+kojiGetTaskState :: String -> TaskID -> IO (Maybe TaskState)
+kojiGetTaskState hubUrl tid = do
+  mti <- getTaskInfo hubUrl (getID tid) False
   return $ case mti of
              Nothing -> Nothing
              Just ti -> readTaskState <$> lookupStruct "state" ti
 
-kojiGetTaskInfo :: TaskID
+kojiGetTaskInfo :: String
+                -> TaskID
                 -> IO (Maybe Struct)
-kojiGetTaskInfo tid = getTaskInfo (getID tid) True
+kojiGetTaskInfo hubUrl tid = getTaskInfo hubUrl (getID tid) True
   -- res <- kojiCall "getTaskInfo" [show taskid]
   -- let state = res ^? key "state" % _Integer <&> (toEnum . fromInteger)
   --     arch = res ^? key "arch" % _String
   -- return $ TaskInfo arch state
 
-kojiGetTaskChildren :: TaskID -> Bool -> IO [Struct]
-kojiGetTaskChildren tid =
-  getTaskChildren (getID tid)
+kojiGetTaskChildren :: String -> TaskID -> Bool -> IO [Struct]
+kojiGetTaskChildren hubUrl tid =
+  getTaskChildren hubUrl (getID tid)
 
-kojiLatestBuild :: String -- ^ tag
+kojiLatestBuild :: String
+                -> String -- ^ tag
                 -> String -- ^ pkg
                 -> IO (Maybe Struct)
-kojiLatestBuild tag pkg =
-  listToMaybe <$> getLatestBuilds (InfoString tag) Nothing (Just pkg) Nothing
+kojiLatestBuild hubUrl tag pkg =
+  listToMaybe <$> getLatestBuilds hubUrl (InfoString tag) Nothing (Just pkg) Nothing
 
 data KojiBuild
   = KojiBuild
@@ -240,9 +245,9 @@ readKojiBuild (ValueStruct values) = do
   return $ KojiBuild buildId packageId owner nvr
 readKojiBuild _ = Nothing
 
-kojiListTaggedBuilds :: Bool -> String -> IO [KojiBuild]
-kojiListTaggedBuilds latest tag = do
-  allValue <- listTagged tag Nothing False Nothing latest Nothing Nothing Nothing
+kojiListTaggedBuilds :: String -> Bool -> String -> IO [KojiBuild]
+kojiListTaggedBuilds hubUrl latest tag = do
+  allValue <- listTagged hubUrl tag Nothing False Nothing latest Nothing Nothing Nothing
   return $ case allValue of
     ValueArray allArray -> mapMaybe readKojiBuild allArray
     _ -> []
