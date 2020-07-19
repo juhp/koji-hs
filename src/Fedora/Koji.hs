@@ -2,6 +2,8 @@ module Fedora.Koji
        ( BuildID(..)
        , BuildInfo(..)
        , buildIDInfo
+       , fedoraKojiHub
+       , centosKojiHub
        , kojiBuildTags
        , kojiGetBuildID
        , kojiGetBuildState
@@ -110,6 +112,12 @@ buildInfo (BuildInfoNVR nvr) = InfoString nvr
 
 buildIDInfo :: BuildID -> BuildInfo
 buildIDInfo (BuildId bid) = BuildInfoID bid
+
+fedoraKojiHub :: String
+fedoraKojiHub = "https://koji.fedoraproject.org/kojihub"
+
+centosKojiHub :: String
+centosKojiHub = "https://koji.mbox.centos.org/kojihub"
 
 kojiGetBuildID :: String -- ^ hub url
                -> String -- ^ NVR
