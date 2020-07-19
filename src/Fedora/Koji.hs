@@ -198,10 +198,10 @@ kojiLatestBuild tag pkg =
 
 data KojiBuild
   = KojiBuild
-      { kpBuildId :: Int
-      , kpPackageId :: Int
-      , kpOwnerName :: String
-      , kpNvr :: String
+      { kbBuildId :: Int
+      , kbPackageId :: Int
+      , kbOwnerName :: String
+      , kbNvr :: String
       }
   deriving (Show)
 
