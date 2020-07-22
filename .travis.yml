@@ -8,20 +8,19 @@ branches:
 git:
   depth: 5
 
-cabal: "3.0"
+cabal: 3.0
 
 cache:
   directories:
   - "$HOME/.cabal"
 
-matrix:
-  include:
-  - ghc: 8.10.1
-  - ghc: 8.8.3
-  - ghc: 8.6.5
-  - ghc: 8.4.4
-  - ghc: 8.2.2
-  - ghc: 8.0.2
+ghc:
+  - 8.10.1
+  - 8.8.3
+  - 8.6.5
+  - 8.4.4
+  - 8.2.2
+  - 8.0.2
 
 install:
   - |
