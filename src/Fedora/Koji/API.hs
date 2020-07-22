@@ -292,7 +292,7 @@ getBuildLogs :: String -> Info -- ^ buildinfo
 getBuildLogs hubUrl = koji hubUrl "getBuildLogs" . infoValue
 
 -- | getBuildTarget info
-getBuildTarget :: String -> String -> IO Value
+getBuildTarget :: String -> String -> IO Struct
 getBuildTarget hubUrl = koji hubUrl "getBuildTarget"
 
 -- | getBuildTargets info event buildTagID destTagID

@@ -5,6 +5,7 @@ module Fedora.Koji
        , fedoraKojiHub
        , centosKojiHub
        , kojiBuildTags
+       , kojiBuildTarget
        , kojiGetBuildID
        , kojiGetBuildState
        , kojiGetBuildTaskID
@@ -255,3 +256,14 @@ kojiListTaggedBuilds hubUrl latest tag =
       owner <- lookupString "owner_name" values
       nvr <- lookupString "nvr" values
       return $ KojiBuild buildId packageId owner nvr
+
+kojiBuildTarget :: String -- ^ hubUrl
+                -> String -- ^ target
+                -> IO (String, String) -- ^ (build-tag,dest-tag)
+kojiBuildTarget hub target =
+  fromMaybe (error "Failed to read target info") . readTarget <$> getBuildTarget hub target
+  where
+  readTarget res = do
+    buildtag <- lookupString "build_tag_name" res
+    desttag <- lookupString "dest_tag_name" res
+    return (buildtag, desttag)
