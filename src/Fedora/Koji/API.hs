@@ -640,7 +640,7 @@ listSideTags hubUrl basetag user =
   koji hubUrl "listSideTags" (maybeInfo basetag) (maybeInfo user)
 
 -- | listTagged(tag, event=None, inherit=False, prefix=None, latest=False, package=None, owner=None, type=None)
-listTagged :: String -> String -> Maybe Int -> Bool -> Maybe String -> Bool -> Maybe String -> Maybe String -> Maybe String -> IO Value
+listTagged :: String -> String -> Maybe Int -> Bool -> Maybe String -> Bool -> Maybe String -> Maybe String -> Maybe String -> IO [Struct]
 listTagged hubUrl tag event inherit prefix latest package owner type_ =
   koji hubUrl "listTagged" tag (maybeInt event) inherit (maybeString prefix) latest (maybeString package) (maybeString owner) (maybeString type_)
 

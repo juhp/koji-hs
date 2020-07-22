@@ -244,18 +244,14 @@ lookupString k values = do
   value <- lookup k values
   getString value
 
-readKojiBuild :: Value -> Maybe KojiBuild
-readKojiBuild (ValueStruct values) = do
-  buildId <- lookupInt "build_id" values
-  packageId <- lookupInt "package_id" values
-  owner <- lookupString "owner_name" values
-  nvr <- lookupString "nvr" values
-  return $ KojiBuild buildId packageId owner nvr
-readKojiBuild _ = Nothing
-
 kojiListTaggedBuilds :: String -> Bool -> String -> IO [KojiBuild]
-kojiListTaggedBuilds hubUrl latest tag = do
-  allValue <- listTagged hubUrl tag Nothing False Nothing latest Nothing Nothing Nothing
-  return $ case allValue of
-    ValueArray allArray -> mapMaybe readKojiBuild allArray
-    _ -> []
+kojiListTaggedBuilds hubUrl latest tag =
+  mapMaybe readKojiBuild <$> listTagged hubUrl tag Nothing False Nothing latest Nothing Nothing Nothing
+  where
+    readKojiBuild :: Struct -> Maybe KojiBuild
+    readKojiBuild values = do
+      buildId <- lookupInt "build_id" values
+      packageId <- lookupInt "package_id" values
+      owner <- lookupString "owner_name" values
+      nvr <- lookupString "nvr" values
+      return $ KojiBuild buildId packageId owner nvr
