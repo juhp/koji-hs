@@ -120,7 +120,7 @@ koji :: Remote a =>
         String -- ^ kojihub url
      -> String -- ^ command
      -> a
-koji kojiHubUrl = remote kojiHubUrl
+koji = remote
 
 -- xmlrpc :: String -> String -> [Value] -> IO Value
 -- xmlrpc url m args = do
