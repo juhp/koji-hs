@@ -1,4 +1,7 @@
-module Fedora.Koji.API
+-- Note: much of this module is untested and experimental:
+-- particularly the functions just returning a Value
+
+module Fedora.Koji.Internal
        ( Info(..)
        , koji
        , hello

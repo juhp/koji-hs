@@ -41,7 +41,7 @@ import Data.List
 import Data.Maybe
 import Network.XmlRpc.Internals
 
-import Fedora.Koji.API
+import Fedora.Koji.Internal
 
 class ID a where
   getID :: a -> Int
