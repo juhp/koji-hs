@@ -34,7 +34,13 @@ module Fedora.Koji
        , BuildState(..)
        , readBuildState
        , Struct
+       , lookupInt
+       , lookupString
        , lookupStruct
+       , Value (..)
+       , getInt
+       , getString
+       , maybeVal
        )
 where
 
@@ -236,12 +242,12 @@ data KojiBuild
       }
   deriving (Show)
 
-lookupInt :: String -> [(String, Value)] -> Maybe Int
+lookupInt :: String -> Struct -> Maybe Int
 lookupInt k values = do
   value <- lookup k values
   getInt value
 
-lookupString :: String -> [(String, Value)] -> Maybe String
+lookupString :: String -> Struct -> Maybe String
 lookupString k values = do
   value <- lookup k values
   getString value
