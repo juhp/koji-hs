@@ -33,6 +33,7 @@ module Fedora.Koji
        , readTaskState
        , BuildState(..)
        , readBuildState
+       , Struct
        , lookupStruct
        )
 where
