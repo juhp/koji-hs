@@ -259,9 +259,9 @@ kojiListTaggedBuilds hubUrl latest tag =
 
 kojiBuildTarget :: String -- ^ hubUrl
                 -> String -- ^ target
-                -> IO (String, String) -- ^ (build-tag,dest-tag)
+                -> IO (Maybe (String, String)) -- ^ (build-tag,dest-tag)
 kojiBuildTarget hub target =
-  fromMaybe (error "Failed to read target info") . readTarget <$> getBuildTarget hub target
+  readTarget <$> getBuildTarget hub target
   where
   readTarget res = do
     buildtag <- lookupString "build_tag_name" res
