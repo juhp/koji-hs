@@ -34,8 +34,6 @@ module Fedora.Koji
        , BuildState(..)
        , readBuildState
        , Struct
-       , lookupInt
-       , lookupString
        , lookupStruct
        , Value (..)
        , getInt
@@ -242,26 +240,16 @@ data KojiBuild
       }
   deriving (Show)
 
-lookupInt :: String -> Struct -> Maybe Int
-lookupInt k values = do
-  value <- lookup k values
-  getInt value
-
-lookupString :: String -> Struct -> Maybe String
-lookupString k values = do
-  value <- lookup k values
-  getString value
-
 kojiListTaggedBuilds :: String -> Bool -> String -> IO [KojiBuild]
 kojiListTaggedBuilds hubUrl latest tag =
   mapMaybe readKojiBuild <$> listTagged hubUrl tag Nothing False Nothing latest Nothing Nothing Nothing
   where
     readKojiBuild :: Struct -> Maybe KojiBuild
     readKojiBuild values = do
-      buildId <- lookupInt "build_id" values
-      packageId <- lookupInt "package_id" values
-      owner <- lookupString "owner_name" values
-      nvr <- lookupString "nvr" values
+      buildId <- lookupStruct "build_id" values
+      packageId <- lookupStruct "package_id" values
+      owner <- lookupStruct "owner_name" values
+      nvr <- lookupStruct "nvr" values
       return $ KojiBuild buildId packageId owner nvr
 
 kojiBuildTarget :: String -- ^ hubUrl
@@ -271,6 +259,6 @@ kojiBuildTarget hub target =
   readTarget <$> getBuildTarget hub target
   where
   readTarget res = do
-    buildtag <- lookupString "build_tag_name" res
-    desttag <- lookupString "dest_tag_name" res
+    buildtag <- lookupStruct "build_tag_name" res
+    desttag <- lookupStruct "dest_tag_name" res
     return (buildtag, desttag)
