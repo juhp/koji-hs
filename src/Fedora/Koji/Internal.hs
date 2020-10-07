@@ -119,8 +119,8 @@ import Network.XmlRpc.Internals
 --import Network.HTTP.Client.Conduit
 import Control.Monad.Except (runExceptT)
 
-koji :: Remote a =>
-        String -- ^ kojihub url
+koji :: Remote a
+     => String -- ^ kojihub url
      -> String -- ^ command
      -> a
 koji = remote
