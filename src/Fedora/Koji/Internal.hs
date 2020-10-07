@@ -638,7 +638,7 @@ listRPMs hubUrl buildID buildrootID imageID componentBuildrootID hostID arches =
   koji hubUrl "listRPMs" (maybeInt buildID) (maybeInt buildrootID) (maybeInt imageID) (maybeInt componentBuildrootID) (maybeInt hostID) (maybeValue arches)
 
 -- | listSideTags(basetag=None, user=None, queryOpts=None)
-listSideTags :: String -> Maybe Info -> Maybe Info -> IO Value
+listSideTags :: String -> Maybe Info -> Maybe Info -> IO [Struct]
 listSideTags hubUrl basetag user =
   koji hubUrl "listSideTags" (maybeInfo basetag) (maybeInfo user)
 
