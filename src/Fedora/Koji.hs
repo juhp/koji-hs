@@ -279,10 +279,11 @@ kojiBuildTarget hub target = do
     desttag <- lookupStruct "dest_tag_name" res
     return (buildtag, desttag)
 
+-- | List sidetags (preferably for user and/or basetag)
 kojiListSideTags :: String -- ^ hubUrl
-                 -> Maybe String --
-                 -> Maybe String
-                 -> IO [String]
+                 -> Maybe String -- ^ basetag
+                 -> Maybe String -- ^ user
+                 -> IO [String] -- ^ list of sidetags
 kojiListSideTags hub mbasetag muser =
   mapMaybe (lookupStruct "name") . structArray <$> listSideTags hub (InfoString <$> mbasetag) (InfoString <$> muser)
 
