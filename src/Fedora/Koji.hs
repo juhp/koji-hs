@@ -9,6 +9,7 @@ module Fedora.Koji
        , kojiGetBuildID
        , kojiGetBuildState
        , kojiGetBuildTaskID
+       , kojiGetCurrentRepo
        , kojiGetRepo
        , kojiGetTaskInfo
        , kojiGetTaskChildren
@@ -301,3 +302,7 @@ kojiGetRepo :: String -> String -> Maybe RepoState -> Maybe Int
             -> IO (Maybe Struct)
 kojiGetRepo hub tag mstate mevent =
   maybeStruct <$> getRepo hub tag (fromEnum <$> mstate) mevent False
+
+kojiGetCurrentRepo :: String -> String -> IO (Maybe Struct)
+kojiGetCurrentRepo hub tag =
+  maybeStruct <$> getRepo hub tag Nothing Nothing False
