@@ -268,8 +268,11 @@ kojiListTaggedBuilds hubUrl latest tag =
 kojiBuildTarget :: String -- ^ hubUrl
                 -> String -- ^ target
                 -> IO (Maybe (String, String)) -- ^ (build-tag,dest-tag)
-kojiBuildTarget hub target =
-  readTarget <$> getBuildTarget hub target
+kojiBuildTarget hub target = do
+  mres <- maybeStruct <$> getBuildTarget hub target
+  case mres of
+    Nothing -> return Nothing
+    Just res -> return $ readTarget res
   where
   readTarget res = do
     buildtag <- lookupStruct "build_tag_name" res
