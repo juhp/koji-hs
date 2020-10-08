@@ -106,6 +106,7 @@ module Fedora.Koji.Internal
 --       , readMethodParams
        , maybeVal
        , maybeStruct
+       , structArray
        , getValue
        )
 where
@@ -165,6 +166,9 @@ maybeStruct :: Value -> Maybe Struct
 maybeStruct (ValueStruct st) = Just st
 maybeStruct _ = Nothing
 
+structArray :: Value -> [Struct]
+structArray (ValueArray v) = mapMaybe maybeStruct v
+structArray _ = []
 
 -- https://koji.fedoraproject.org/koji/api
 
@@ -638,8 +642,8 @@ listRPMs hubUrl buildID buildrootID imageID componentBuildrootID hostID arches =
   koji hubUrl "listRPMs" (maybeInt buildID) (maybeInt buildrootID) (maybeInt imageID) (maybeInt componentBuildrootID) (maybeInt hostID) (maybeValue arches)
 
 -- | listSideTags(basetag=None, user=None, queryOpts=None)
-listSideTags :: String -> Maybe Info -> Maybe Info -> IO [Struct]
-listSideTags hubUrl basetag user =
+listSideTags :: String -> Maybe Info -> Maybe Info -> IO Value
+listSideTags hubUrl basetag user = do
   koji hubUrl "listSideTags" (maybeInfo basetag) (maybeInfo user)
 
 -- | listTagged(tag, event=None, inherit=False, prefix=None, latest=False, package=None, owner=None, type=None)

@@ -14,6 +14,7 @@ module Fedora.Koji
        , kojiGetTaskState
        , kojiGetUserID
        , kojiLatestBuild
+       , kojiListSideTags
        , kojiListTaskIDs
        , kojiUserBuildTasks
        , KojiBuild(..)
@@ -262,3 +263,10 @@ kojiBuildTarget hub target =
     buildtag <- lookupStruct "build_tag_name" res
     desttag <- lookupStruct "dest_tag_name" res
     return (buildtag, desttag)
+
+kojiListSideTags :: String -- ^ hubUrl
+                 -> Maybe String --
+                 -> Maybe String
+                 -> IO [String]
+kojiListSideTags hub mbasetag muser =
+  mapMaybe (lookupStruct "name") . structArray <$> listSideTags hub (InfoString <$> mbasetag) (InfoString <$> muser)
