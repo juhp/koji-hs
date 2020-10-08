@@ -15,6 +15,7 @@ module Fedora.Koji
        , kojiGetTaskState
        , kojiGetUserID
        , kojiLatestBuild
+       , kojiLatestBuildRepo
        , kojiListSideTags
        , kojiListTaskIDs
        , kojiUserBuildTasks
@@ -228,12 +229,20 @@ kojiGetTaskChildren :: String -> TaskID -> Bool -> IO [Struct]
 kojiGetTaskChildren hubUrl tid =
   getTaskChildren hubUrl (getID tid)
 
-kojiLatestBuild :: String
+kojiLatestBuild :: String -- ^ hub
                 -> String -- ^ tag
                 -> String -- ^ pkg
                 -> IO (Maybe Struct)
 kojiLatestBuild hubUrl tag pkg =
   listToMaybe <$> getLatestBuilds hubUrl (InfoString tag) Nothing (Just pkg) Nothing
+
+kojiLatestBuildRepo :: String -- ^ hub
+                    -> String -- ^ tag
+                    -> Int    -- ^ event
+                    -> String -- ^ pkg
+                    -> IO (Maybe Struct)
+kojiLatestBuildRepo hubUrl tag event pkg =
+  listToMaybe <$> getLatestBuilds hubUrl (InfoString tag) (Just event) (Just pkg) Nothing
 
 data KojiBuild
   = KojiBuild
