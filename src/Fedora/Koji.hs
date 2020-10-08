@@ -9,6 +9,7 @@ module Fedora.Koji
        , kojiGetBuildID
        , kojiGetBuildState
        , kojiGetBuildTaskID
+       , kojiGetRepo
        , kojiGetTaskInfo
        , kojiGetTaskChildren
        , kojiGetTaskState
@@ -40,6 +41,8 @@ module Fedora.Koji
        , getInt
        , getString
        , maybeVal
+       , RepoState(..)
+       , readRepoState
        )
 where
 
@@ -270,3 +273,18 @@ kojiListSideTags :: String -- ^ hubUrl
                  -> IO [String]
 kojiListSideTags hub mbasetag muser =
   mapMaybe (lookupStruct "name") . structArray <$> listSideTags hub (InfoString <$> mbasetag) (InfoString <$> muser)
+
+data RepoState = RepoInit | RepoReady | RepoExpired | RepoDeleted | RepoProblem
+  deriving (Eq, Enum, Show)
+
+readRepoState :: Value -> RepoState
+readRepoState (ValueInt i) | i `elem` map fromEnum (enumFrom RepoInit) = toEnum i
+readRepoState _ = error "invalid repo state"
+
+-- getRepoState :: Struct -> Maybe RepoState
+-- getRepoState st = readRepoState <$> lookup "state" st
+
+kojiGetRepo :: String -> String -> Maybe RepoState -> Maybe Int
+            -> IO (Maybe Struct)
+kojiGetRepo hub tag mstate mevent =
+  maybeStruct <$> getRepo hub tag (fromEnum <$> mstate) mevent False
