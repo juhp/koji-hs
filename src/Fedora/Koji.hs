@@ -48,7 +48,7 @@ module Fedora.Koji
        )
 where
 
-import Data.List
+import qualified Data.List as L
 import Data.Maybe
 import Network.XmlRpc.Internals
 
@@ -161,8 +161,8 @@ kojiUserBuildTasks hubUrl userid msource mtarget = do
         case mreq of
           Nothing -> False
           Just req ->
-            maybe True (`isInfixOf` req) msource &&
-            maybe True (\ target -> ("<value><string>" ++ target ++ "</string></value>") `isInfixOf` req) mtarget
+            maybe True (`L.isInfixOf` req) msource &&
+            maybe True (\ target -> ("<value><string>" ++ target ++ "</string></value>") `L.isInfixOf` req) mtarget
 
 -- getTagID :: String -- ^ tag
 --          -> IO TagID
