@@ -491,8 +491,12 @@ getTagGroups hubUrl tag event =
   koji hubUrl "getTagGroups" tag (maybeInt event)
 
 -- | getTagID(info, strict=False, create=False)
-getTagID :: String -> Info -> IO Value
-getTagID hubUrl = koji hubUrl "getTagID" . infoValue
+getTagID :: String -> Info -> IO (Maybe Int)
+getTagID hubUrl tag = do
+  res <- koji hubUrl "getTagID" (infoValue tag)
+  case res of
+    ValueInt i -> return $ Just i
+    _ -> return Nothing
 
 -- | getTaskChildren(task_id, request=False, strict=False)
 getTaskChildren :: String -> Int -> Bool -> IO [Struct]
