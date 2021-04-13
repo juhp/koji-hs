@@ -1,4 +1,0 @@
-resolver: lts-11.22
-
-extra-deps:
-  - haxr-3000.11.4
