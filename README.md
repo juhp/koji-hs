@@ -6,15 +6,27 @@
 [![Stackage Nightly](http://stackage.org/package/koji/badge/nightly)](http://stackage.org/nightly/package/koji)
 [![GPL-2 license](https://img.shields.io/badge/license-GPL--2-blue.svg)](LICENSE)
 
-This is a WIP: currently only querying koji working,
-ie no login or building etc.
+[Koji](https://pagure.io/koji/) is a distributed RPM-based buildsystem.
 
-## Installation
+This library provides Haskell bindings to the Koji XMLRPC API.
+
+It is a WIP: currently only querying koji working,
+ie login authentication or building etc is supported yet.
+
+## Building
 
 Build with `stack` or `cabal new-build`.
 
 ## Usage
 
-I believe due to haxr using HsOpenSSL, programs using this library
+Due to haxr using HsOpenSSL, programs using this library
 need to be linked with `ghc-options: -threaded`, otherwise
-the RTS will complain with an error.
+the ghc RTS will complain with a runtime error.
+
+See the Haddock documentation for more details.
+
+## Projects using koji-hs
+
+- [fbrnch](https://github.com/juhp/fbrnch/)
+- [koji-progress](https://github.com/juhp/koji-progress)
+- [pkgtreediff](https://github.com/juhp/pkgtreediff/)
