@@ -1,7 +1,7 @@
 -- Note: much of this module is untested and experimental:
 -- particularly the functions just returning a Value
 
-module Fedora.Koji.Internal
+module Distribution.Koji.Internal
        ( Info(..)
        , koji
        , hello

@@ -1,4 +1,4 @@
-module Fedora.Koji
+module Distribution.Koji
        ( BuildID(..)
        , BuildInfo(..)
        , buildIDInfo
@@ -52,7 +52,7 @@ import qualified Data.List as L
 import Data.Maybe
 import Network.XmlRpc.Internals
 
-import Fedora.Koji.Internal
+import Distribution.Koji.Internal
 
 class ID a where
   getID :: a -> Int
