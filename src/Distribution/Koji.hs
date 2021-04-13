@@ -1,3 +1,7 @@
+{-|
+A library for accessing a Koji hub via its XMLRPC API.
+-}
+
 module Distribution.Koji
        ( BuildID(..)
        , BuildInfo(..)
@@ -54,6 +58,7 @@ import Network.XmlRpc.Internals
 
 import Distribution.Koji.Internal
 
+-- | A class for various id's: taskid, tagid, buildid, packageid, etc
 class ID a where
   getID :: a -> Int
   mkID :: Int -> a
@@ -143,14 +148,18 @@ kojiGetBuildTaskID :: String -- ^ hub url
 kojiGetBuildTaskID hubUrl nvr =
   ((fmap TaskId . lookupStruct "task_id") =<<) <$> getBuild hubUrl (InfoString nvr)
 
-kojiListTaskIDs :: String
-                -> Struct -- ^ opts
-                -> Struct -- ^ qopts
+kojiListTaskIDs :: String -- ^ hub url
+                -> Struct -- ^ options
+                -> Struct -- ^ query opts
                 -> IO [TaskID]
 kojiListTaskIDs hubUrl opts qopts =
   mapMaybe readID <$> listTasks hubUrl opts qopts
 
-kojiUserBuildTasks :: String -> UserID -> Maybe String -> Maybe String -> IO [TaskID]
+kojiUserBuildTasks :: String -- ^ hub url
+                   -> UserID
+                   -> Maybe String -- ^ source
+                   -> Maybe String -- ^ target
+                   -> IO [TaskID]
 kojiUserBuildTasks hubUrl userid msource mtarget = do
   tasks <- listTasks hubUrl [("owner",ValueInt (getID userid)),("method",ValueString "build"),("state",openTaskValues)] []
   return $ map TaskId . mapMaybe (lookupStruct "id") $ filter isTheBuild tasks
@@ -169,31 +178,49 @@ kojiUserBuildTasks hubUrl userid msource mtarget = do
 -- getTagID tag =
 --   TagId <$> koji "getTagID" tag
 
-kojiGetUserID :: String -> String -> IO (Maybe UserID)
+kojiGetUserID :: String -- ^ hub url
+              -> String -- ^ user
+              -> IO (Maybe UserID)
 kojiGetUserID hubUrl name = do
   res <- getUser hubUrl (InfoString name) False
   return $ readID =<< res
 
-kojiBuildTags :: String -> BuildInfo -> IO [String]
+kojiBuildTags :: String  -- ^ hub url
+              -> BuildInfo
+              -> IO [String]
 kojiBuildTags hubUrl buildinfo = do
   lst <- listTags hubUrl (Just (buildInfo buildinfo)) Nothing False
   return $ mapMaybe (lookupStruct "name") lst
 
-data BuildState = BuildBuilding | BuildComplete | BuildDeleted | BuildFailed | BuildCanceled
+-- | The state of a build
+data BuildState = BuildBuilding
+                | BuildComplete
+                | BuildDeleted
+                | BuildFailed
+                | BuildCanceled
   deriving (Eq, Enum, Show)
 
 readBuildState :: Value -> BuildState
 readBuildState (ValueInt i) | i `elem` map fromEnum (enumFrom BuildBuilding) = toEnum i
 readBuildState _ = error "invalid build state"
 
-kojiGetBuildState :: String -> BuildInfo -> IO (Maybe BuildState)
+kojiGetBuildState :: String -- ^ hub url
+                  -> BuildInfo
+                  -> IO (Maybe BuildState)
 kojiGetBuildState hubUrl buildinfo =
   ((fmap readBuildState . lookupStruct "state") =<<) <$>
   getBuild hubUrl (buildInfo buildinfo)
 
-data TaskState = TaskFree | TaskOpen | TaskClosed | TaskCanceled | TaskAssigned | TaskFailed
+-- | The state of a task
+data TaskState = TaskFree
+               | TaskOpen
+               | TaskClosed
+               | TaskCanceled
+               | TaskAssigned
+               | TaskFailed
   deriving (Eq, Enum, Show)
 
+-- | Open task states
 openTaskStates :: [TaskState]
 openTaskStates = [TaskFree, TaskOpen, TaskAssigned]
 
@@ -210,14 +237,16 @@ readTaskState _ = error "invalid task state"
 getTaskState :: Struct -> Maybe TaskState
 getTaskState st = readTaskState <$> lookup "state" st
 
-kojiGetTaskState :: String -> TaskID -> IO (Maybe TaskState)
+kojiGetTaskState :: String -- ^ hub url
+                 -> TaskID
+                 -> IO (Maybe TaskState)
 kojiGetTaskState hubUrl tid = do
   mti <- getTaskInfo hubUrl (getID tid) False
   return $ case mti of
              Nothing -> Nothing
              Just ti -> readTaskState <$> lookupStruct "state" ti
 
-kojiGetTaskInfo :: String
+kojiGetTaskInfo :: String -- ^ hub url
                 -> TaskID
                 -> IO (Maybe Struct)
 kojiGetTaskInfo hubUrl tid = getTaskInfo hubUrl (getID tid) True
@@ -226,7 +255,10 @@ kojiGetTaskInfo hubUrl tid = getTaskInfo hubUrl (getID tid) True
   --     arch = res ^? key "arch" % _String
   -- return $ TaskInfo arch state
 
-kojiGetTaskChildren :: String -> TaskID -> Bool -> IO [Struct]
+kojiGetTaskChildren :: String -- ^ hub url
+                    -> TaskID
+                    -> Bool
+                    -> IO [Struct]
 kojiGetTaskChildren hubUrl tid =
   getTaskChildren hubUrl (getID tid)
 
@@ -245,6 +277,7 @@ kojiLatestBuildRepo :: String -- ^ hub
 kojiLatestBuildRepo hubUrl tag event pkg =
   listToMaybe <$> getLatestBuilds hubUrl (InfoString tag) (Just event) (Just pkg) Nothing
 
+-- | Build metadata
 data KojiBuild
   = KojiBuild
       { kbBuildId :: Int
@@ -254,7 +287,10 @@ data KojiBuild
       }
   deriving (Show)
 
-kojiListTaggedBuilds :: String -> Bool -> String -> IO [KojiBuild]
+kojiListTaggedBuilds :: String -- ^ hub url
+                     -> Bool -- ^ latest
+                     -> String -- ^ tag
+                     -> IO [KojiBuild]
 kojiListTaggedBuilds hubUrl latest tag =
   mapMaybe readKojiBuild <$> listTagged hubUrl tag Nothing False Nothing latest Nothing Nothing Nothing
   where
@@ -288,7 +324,12 @@ kojiListSideTags :: String -- ^ hubUrl
 kojiListSideTags hub mbasetag muser =
   mapMaybe (lookupStruct "name") . structArray <$> listSideTags hub (InfoString <$> mbasetag) (InfoString <$> muser)
 
-data RepoState = RepoInit | RepoReady | RepoExpired | RepoDeleted | RepoProblem
+-- | Repo state
+data RepoState = RepoInit
+               | RepoReady
+               | RepoExpired
+               | RepoDeleted
+               | RepoProblem
   deriving (Eq, Enum, Show)
 
 readRepoState :: Value -> RepoState
@@ -298,8 +339,11 @@ readRepoState _ = error "invalid repo state"
 -- getRepoState :: Struct -> Maybe RepoState
 -- getRepoState st = readRepoState <$> lookup "state" st
 
-kojiGetRepo :: String -> String -> Maybe RepoState -> Maybe Int
-            -> IO (Maybe Struct)
+kojiGetRepo :: String -- ^ hub url
+            -> String -- ^ tag
+            -> Maybe RepoState
+            -> Maybe Int -- ^ event
+            -> IO (Maybe Struct) -- ^ result
 kojiGetRepo hub tag mstate mevent =
   maybeStruct <$> getRepo hub tag (fromEnum <$> mstate) mevent False
 
