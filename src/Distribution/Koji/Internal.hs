@@ -1,5 +1,16 @@
--- Note: much of this module is untested and experimental:
--- particularly the functions just returning a Value
+{-|
+Low level XMLRPC API based directly on the python API
+since that is the only available reference documentation:
+<https://koji.fedoraproject.org/koji/api>.
+
+Note that many of the procedures in this module are untested and experimental:
+particularly most of them that return a Value.
+Hence this module is misnamed Internal for now.
+
+Fixes and enhancements welcome.
+-}
+
+
 
 module Distribution.Koji.Internal
        ( Info(..)
@@ -141,7 +152,7 @@ koji = remote
 --     handleResponse (Return v)       = return v
 --     handleResponse (Fault code str) = error ("Error " ++ show code ++ ": " ++ str)
 
--- FIXME rename to newtype KojiStruct
+-- FIXME rename to newtype KojiStruct?
 type Struct = [(String,Value)]
 
 maybeString :: Maybe String -> Value
