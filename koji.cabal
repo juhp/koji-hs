@@ -5,6 +5,7 @@ description:
         This library provides Haskell bindings to the Koji XML RPC API.
         Koji is a distributed rpm buildsystem used by Fedora, Centos,
         Red Hat, and other projects. See <https://pagure.io/koji/>.
+category:            Network
 homepage:            https://github.com/juhp/koji-hs
 bug-reports:         https://github.com/juhp/koji-hs/issues
 license:             GPL-2
