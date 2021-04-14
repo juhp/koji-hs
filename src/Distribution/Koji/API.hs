@@ -114,7 +114,6 @@ module Distribution.Koji.API
 --       , readStructString
 --       , readStructArray
 --       , readMethodParams
-       , maybeVal
        , maybeStruct
        , structArray
        , getValue
@@ -830,9 +829,6 @@ taskReport hubUrl = koji hubUrl "taskReport" . maybeString
 lookupStruct :: XmlRpcType a => String -> Struct -> Maybe a
 lookupStruct key struct =
   either error id <$> runExceptT (getField key struct)
-
-maybeVal :: String -> Maybe a -> a
-maybeVal err = fromMaybe (error err)
 
 getValue :: XmlRpcType a => Value -> Maybe a
 getValue = fmap (either error id) . runExceptT . fromValue

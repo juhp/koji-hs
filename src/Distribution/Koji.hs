@@ -46,7 +46,6 @@ module Distribution.Koji
        , Value (..)
        , getInt
        , getString
-       , maybeVal
        , RepoState(..)
        , readRepoState
        )
