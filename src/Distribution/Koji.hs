@@ -122,31 +122,38 @@ instance ID BuildrootID where
 
 data BuildInfo = BuildInfoID Int | BuildInfoNVR String
 
+-- | map a BuildInfo into a Info
 buildInfo :: BuildInfo -> Info
 buildInfo (BuildInfoID bid) = InfoID bid
 buildInfo (BuildInfoNVR nvr) = InfoString nvr
 
+-- | map a buildid into a buildinfo
 buildIDInfo :: BuildID -> BuildInfo
 buildIDInfo (BuildId bid) = BuildInfoID bid
 
+-- | main Fedora Koji Hub
 fedoraKojiHub :: String
 fedoraKojiHub = "https://koji.fedoraproject.org/kojihub"
 
+-- | Centos Koji mbox Hub
 centosKojiHub :: String
 centosKojiHub = "https://koji.mbox.centos.org/kojihub"
 
+-- | Get the buildid of an nvr build
 kojiGetBuildID :: String -- ^ hub url
                -> String -- ^ NVR
                -> IO (Maybe BuildID)
 kojiGetBuildID hubUrl nvr =
   ((fmap BuildId . lookupStruct "id") =<<) <$> getBuild hubUrl (InfoString nvr)
 
+-- | Get the task of an nvr build
 kojiGetBuildTaskID :: String -- ^ hub url
                    -> String -- ^ NVR
                    -> IO (Maybe TaskID)
 kojiGetBuildTaskID hubUrl nvr =
   ((fmap TaskId . lookupStruct "task_id") =<<) <$> getBuild hubUrl (InfoString nvr)
 
+-- | List tasks filtered by query options
 kojiListTaskIDs :: String -- ^ hub url
                 -> Struct -- ^ options
                 -> Struct -- ^ query opts
@@ -154,6 +161,7 @@ kojiListTaskIDs :: String -- ^ hub url
 kojiListTaskIDs hubUrl opts qopts =
   mapMaybe readID <$> listTasks hubUrl opts qopts
 
+-- | List the open tasks of a user (matching source/target)
 kojiUserBuildTasks :: String -- ^ hub url
                    -> UserID
                    -> Maybe String -- ^ source
@@ -177,6 +185,7 @@ kojiUserBuildTasks hubUrl userid msource mtarget = do
 -- getTagID tag =
 --   TagId <$> koji "getTagID" tag
 
+-- | Get the userid for the named user
 kojiGetUserID :: String -- ^ hub url
               -> String -- ^ user
               -> IO (Maybe UserID)
@@ -184,6 +193,7 @@ kojiGetUserID hubUrl name = do
   res <- getUser hubUrl (InfoString name) False
   return $ readID =<< res
 
+-- | Get the tags of a build
 kojiBuildTags :: String  -- ^ hub url
               -> BuildInfo
               -> IO [String]
@@ -203,6 +213,7 @@ readBuildState :: Value -> BuildState
 readBuildState (ValueInt i) | i `elem` map fromEnum (enumFrom BuildBuilding) = toEnum i
 readBuildState _ = error "invalid build state"
 
+-- | Get the state of a build
 kojiGetBuildState :: String -- ^ hub url
                   -> BuildInfo
                   -> IO (Maybe BuildState)
@@ -236,6 +247,7 @@ readTaskState _ = error "invalid task state"
 getTaskState :: Struct -> Maybe TaskState
 getTaskState st = readTaskState <$> lookup "state" st
 
+-- | Get the state of a taskid
 kojiGetTaskState :: String -- ^ hub url
                  -> TaskID
                  -> IO (Maybe TaskState)
@@ -245,6 +257,7 @@ kojiGetTaskState hubUrl tid = do
              Nothing -> Nothing
              Just ti -> readTaskState <$> lookupStruct "state" ti
 
+-- | Get info about a task
 kojiGetTaskInfo :: String -- ^ hub url
                 -> TaskID
                 -> IO (Maybe Struct)
@@ -254,6 +267,7 @@ kojiGetTaskInfo hubUrl tid = getTaskInfo hubUrl (getID tid) True
   --     arch = res ^? key "arch" % _String
   -- return $ TaskInfo arch state
 
+-- | Get the children tasks of a task
 kojiGetTaskChildren :: String -- ^ hub url
                     -> TaskID
                     -> Bool
@@ -261,6 +275,7 @@ kojiGetTaskChildren :: String -- ^ hub url
 kojiGetTaskChildren hubUrl tid =
   getTaskChildren hubUrl (getID tid)
 
+-- | Get the latest build of a package in a tag
 kojiLatestBuild :: String -- ^ hub
                 -> String -- ^ tag
                 -> String -- ^ pkg
@@ -268,6 +283,9 @@ kojiLatestBuild :: String -- ^ hub
 kojiLatestBuild hubUrl tag pkg =
   listToMaybe <$> getLatestBuilds hubUrl (InfoString tag) Nothing (Just pkg) Nothing
 
+-- | Get latest build in a tag for package at a time event.
+--
+-- Used for example to implement waitrepo
 kojiLatestBuildRepo :: String -- ^ hub
                     -> String -- ^ tag
                     -> Int    -- ^ event
@@ -286,6 +304,7 @@ data KojiBuild
       }
   deriving (Show)
 
+-- | List builds in a tag
 kojiListTaggedBuilds :: String -- ^ hub url
                      -> Bool -- ^ latest
                      -> String -- ^ tag
@@ -301,6 +320,7 @@ kojiListTaggedBuilds hubUrl latest tag =
       nvr <- lookupStruct "nvr" values
       return $ KojiBuild buildId packageId owner nvr
 
+-- | Get the build and dest tags for a target.
 kojiBuildTarget :: String -- ^ hubUrl
                 -> String -- ^ target
                 -> IO (Maybe (String, String)) -- ^ (build-tag,dest-tag)
@@ -338,6 +358,7 @@ readRepoState _ = error "invalid repo state"
 -- getRepoState :: Struct -> Maybe RepoState
 -- getRepoState st = readRepoState <$> lookup "state" st
 
+-- | Get repo info for tag
 kojiGetRepo :: String -- ^ hub url
             -> String -- ^ tag
             -> Maybe RepoState
@@ -346,6 +367,7 @@ kojiGetRepo :: String -- ^ hub url
 kojiGetRepo hub tag mstate mevent =
   maybeStruct <$> getRepo hub tag (fromEnum <$> mstate) mevent False
 
+-- | Get current repo info for tag
 kojiGetCurrentRepo :: String -> String -> IO (Maybe Struct)
 kojiGetCurrentRepo hub tag =
   maybeStruct <$> getRepo hub tag Nothing Nothing False

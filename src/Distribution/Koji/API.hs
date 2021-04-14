@@ -4,7 +4,9 @@ since that is the only available reference documentation:
 <https://koji.fedoraproject.org/koji/api>.
 
 Note that many of the procedures in this module are untested and experimental:
-particularly most of them that return a Value.
+particularly most of those that return a Value.
+
+Higher level wrapper procedures live in Distribution.Koji.
 
 Fixes and enhancements welcome.
 -}
@@ -129,6 +131,7 @@ import Network.XmlRpc.Internals
 --import Network.HTTP.Client.Conduit
 import Control.Monad.Except (runExceptT)
 
+-- | Low-level variadic XML RPC call to a Koji Hub
 koji :: Remote a
      => String -- ^ kojihub url
      -> String -- ^ command
@@ -162,6 +165,7 @@ maybeInt = maybe ValueNil ValueInt
 maybeValue :: Maybe Value -> Value
 maybeValue = fromMaybe ValueNil
 
+-- | info is either an id or string
 data Info = InfoID Int | InfoString String
 
 infoValue :: Info -> Value
@@ -577,6 +581,7 @@ getWinBuild hubUrl = fmap maybeStruct . koji hubUrl "getWinBuild" . infoValue
 
 -- hasPerm(perm, strict=False)
 
+-- | Say hello to test XMLRPC connection to Koji Hub
 hello :: String -> IO String
 hello hubUrl = koji hubUrl "hello"
 
@@ -826,6 +831,7 @@ taskReport hubUrl = koji hubUrl "taskReport" . maybeString
 --   where
 --     params (MethodCall _m str) = str
 
+-- | Lookup a key in a XML result
 lookupStruct :: XmlRpcType a => String -> Struct -> Maybe a
 lookupStruct key struct =
   either error id <$> runExceptT (getField key struct)
