@@ -4,4 +4,4 @@
 
 ## 0.0.1
 - First Hackage release with higher level Distribution.Koji and
-  low level Distribution.Koji.Internal modules. Only query procedures.
+  low level Distribution.Koji.API modules. Only query procedures.

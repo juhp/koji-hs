@@ -56,7 +56,7 @@ import qualified Data.List as L
 import Data.Maybe
 import Network.XmlRpc.Internals
 
-import Distribution.Koji.Internal
+import Distribution.Koji.API
 
 -- | A class for various id's: taskid, tagid, buildid, packageid, etc
 class ID a where

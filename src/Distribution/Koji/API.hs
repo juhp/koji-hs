@@ -5,14 +5,13 @@ since that is the only available reference documentation:
 
 Note that many of the procedures in this module are untested and experimental:
 particularly most of them that return a Value.
-Hence this module is misnamed Internal for now.
 
 Fixes and enhancements welcome.
 -}
 
 
 
-module Distribution.Koji.Internal
+module Distribution.Koji.API
        ( Info(..)
        , koji
        , hello

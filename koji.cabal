@@ -30,7 +30,7 @@ source-repository head
 library
   hs-source-dirs:      src
   exposed-modules:     Distribution.Koji
-                       Distribution.Koji.Internal
+                       Distribution.Koji.API
 
   build-depends:       base >= 4 && < 5
                      , haxr >= 3000.11.4
