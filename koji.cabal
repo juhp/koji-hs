@@ -1,6 +1,6 @@
 name:                koji
 version:             0.0.1
-synopsis:            Koji buildsystem XMLRPC API bindings
+synopsis:            Koji buildsystem XML-RPC API bindings
 description:
         This library provides Haskell bindings to the Koji XML RPC API.
         Koji is a distributed rpm buildsystem used by Fedora, Centos,

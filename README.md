@@ -1,4 +1,4 @@
-# Koji XMLRPC binding for Haskell
+# Koji XML-RPC binding for Haskell
 
 [![GitHub CI](https://github.com/juhp/koji-hs/workflows/build/badge.svg)](https://github.com/juhp/koji-hs/actions)
 [![Hackage](https://img.shields.io/hackage/v/koji.svg?logo=haskell)](https://hackage.haskell.org/package/koji)
@@ -8,7 +8,7 @@
 
 [Koji](https://pagure.io/koji/) is a distributed RPM-based buildsystem.
 
-This library provides Haskell bindings to the Koji XMLRPC API.
+This library provides Haskell bindings to the Koji XML-RPC API.
 
 It is a WIP: currently only querying koji is working,
 ie login authentication or building etc is supported yet.
