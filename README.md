@@ -10,7 +10,7 @@
 
 This library provides Haskell bindings to the Koji XMLRPC API.
 
-It is a WIP: currently only querying koji working,
+It is a WIP: currently only querying koji is working,
 ie login authentication or building etc is supported yet.
 
 ## Building
