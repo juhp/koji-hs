@@ -615,11 +615,17 @@ listBuildroots :: String -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe Int -> 
 listBuildroots hubUrl hostID tagID state rpmID archiveID taskID buildrootID =
   koji hubUrl "listBuildroots" (maybeInt hostID) (maybeInt tagID) (maybeInt state) (maybeInt rpmID) (maybeInt archiveID) (maybeInt taskID) (maybeInt buildrootID)
 
--- | listBuilds (packageID=None, userID=None, taskID=None, prefix=None, state=None, volumeID=None, source=None, createdBefore=None, createdAfter=None, completeBefore=None, completeAfter=None, type=None, typeInfo=None, queryOpts=None)
+-- | listBuilds(packageID=None, userID=None, taskID=None, prefix=None, state=None, volumeID=None, source=None, createdBefore=None, createdAfter=None, completeBefore=None, completeAfter=None, type=None, typeInfo=None, queryOpts=None, pattern=None)
+--
+-- Note that pattern is only supported for koji >= 1.24
 listBuilds :: String -> Struct -> IO [Struct]
 listBuilds hubUrl args =
-  let maybeArg fld = maybeValue (lookupStruct fld args) in
-    koji hubUrl "listBuilds" (maybeArg "packageID") (maybeArg "userID") (maybeArg "taskID") (maybeArg "prefix") (maybeArg "state") (maybeArg "volumeID") (maybeArg "source") (maybeArg "createdBefore") (maybeArg "createdAfter") (maybeArg "completeBefore") (maybeArg "completeAfter") (maybeArg "type") (maybeArg "typeInfo") (maybeArg "queryOpts")
+  let maybeArg fld = maybeValue (lookupStruct fld args)
+  -- koji 1.24 added support for pattern
+  in case maybeArg "pattern" of
+       ValueNil ->
+         koji hubUrl "listBuilds" (maybeArg "packageID") (maybeArg "userID") (maybeArg "taskID") (maybeArg "prefix") (maybeArg "state") (maybeArg "volumeID") (maybeArg "source") (maybeArg "createdBefore") (maybeArg "createdAfter") (maybeArg "completeBefore") (maybeArg "completeAfter") (maybeArg "type") (maybeArg "typeInfo") (maybeArg "queryOpts")
+       pat -> koji hubUrl "listBuilds" (maybeArg "packageID") (maybeArg "userID") (maybeArg "taskID") (maybeArg "prefix") (maybeArg "state") (maybeArg "volumeID") (maybeArg "source") (maybeArg "createdBefore") (maybeArg "createdAfter") (maybeArg "completeBefore") (maybeArg "completeAfter") (maybeArg "type") (maybeArg "typeInfo") (maybeArg "queryOpts") pat
 
 -- | listCGs()
 listCGs :: String -> IO Struct
