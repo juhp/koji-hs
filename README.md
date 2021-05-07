@@ -8,7 +8,8 @@
 
 [Koji](https://pagure.io/koji/) is a distributed RPM-based buildsystem.
 
-This library provides Haskell bindings to the Koji XML-RPC API.
+The koji-hs project provides the Haskell koji package which provides library
+with bindings to the Koji XML-RPC API.
 
 It is a WIP: currently only querying koji is working,
 ie login authentication or building etc is supported yet.

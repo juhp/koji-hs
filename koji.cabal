@@ -1,5 +1,5 @@
 name:                koji
-version:             0.0.1
+version:             0.0.2
 synopsis:            Koji buildsystem XML-RPC API bindings
 description:
         This library provides Haskell bindings to the Koji XML RPC API.
