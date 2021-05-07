@@ -581,7 +581,7 @@ getWinBuild hubUrl = fmap maybeStruct . koji hubUrl "getWinBuild" . infoValue
 
 -- hasPerm(perm, strict=False)
 
--- | Say hello to test XMLRPC connection to Koji Hub
+-- | Say hello to test XMLRPC connection to a Koji Hub
 hello :: String -> IO String
 hello hubUrl = koji hubUrl "hello"
 

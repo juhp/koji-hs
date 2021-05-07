@@ -6,7 +6,8 @@
 [![Stackage Nightly](http://stackage.org/package/koji/badge/nightly)](http://stackage.org/nightly/package/koji)
 [![GPL-2 license](https://img.shields.io/badge/license-GPL--2-blue.svg)](LICENSE)
 
-[Koji](https://pagure.io/koji/) is a distributed RPM-based buildsystem.
+[Koji](https://pagure.io/koji/) is a distributed RPM-based buildsystem,
+controlled by a Koji Hub server.
 
 This koji-hs project provides the Haskell koji package,
 a library with bindings to the Koji XML-RPC API.
